@@ -180,7 +180,86 @@ CREATE TABLE UczestnikWarsztatu (
 	PRIMARY KEY (ID_UczestnikaKonferencji, ID_ZamowieniaWarsztatu)
 
 )
-
+GO
 ----------------------------------------------------------------------------------------------------------------
 
+CREATE PROCEDURE nowy_adres
+	@Adres NVARCHAR(45),
+	@KodPocztowy NVARCHAR(10),
+	@Miasto NVARCHAR(25) ,
+	@Kraj NVARCHAR(25)
+	
+AS
+BEGIN
 
+	SET NOCOUNT ON;
+		INSERT INTO DaneAdresowe 
+		VALUES(@Adres,@Miasto,@KodPocztowy,@Kraj)
+END
+GO
+
+CREATE PROCEDURE dodaj_klienta_prywatnego
+
+	@Imie NVARCHAR(20),
+	@Nazwisko NVARCHAR(20),
+	@NrAlbumu NVARCHAR(6) = null,
+	@Telefon NVARCHAR(25) = null,
+	@Email NVARCHAR(45) = null,
+	@Adres NVARCHAR(60),
+	@Miasto NVARCHAR(15),
+	@KodPocztowy NVARCHAR(10),
+	@Kraj NVARCHAR(15)
+
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+	declare @ID_Osoby as int;
+	declare @ID_Klienta as int;
+	declare @ID_DanychAdresowych  as int;
+	
+	begin try
+		begin tran 
+
+		execute nowy_adres @Adres, @Miasto, @KodPocztowy, @Kraj;
+		set @ID_DanychAdresowych = @@IDENTITY;
+		
+		INSERT INTO Klient VALUES(0);
+		set @ID_Klienta = @@IDENTITY;
+		
+		INSERT INTO Osoba
+		VALUES(@ID_Klienta,@ID_DanychAdresowych, @Imie, @Nazwisko, @NrAlbumu, @Telefon, @Email);
+		COMMIT TRAN
+	end try
+	begin catch
+		declare @error as varchar(127)
+		set @error = (Select ERROR_MESSAGE())
+		RAISERROR('Nie mozna dodac osoby-klienta, blad danych. %s', 16, 1, @error);
+		ROLLBACK TRAN
+	end catch
+END
+GO
+
+
+GO
+CREATE PROCEDURE dodaj_osobe_jako_klienta
+	@ID_Osoby int
+		
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+		IF (select Osoba.ID_Klienta from Osoba where Osoba.ID_Osoby = @ID_Osoby) is null
+		BEGIN
+			INSERT INTO Klient VALUES (0)
+			UPDATE Osoba
+			SET ID_Klienta = @@IDENTITY
+			WHERE Osoba.ID_Osoby = @ID_Osoby 
+		END
+		ELSE
+		BEGIN
+			RAISERROR('Ta osoba jest juz klientem. ', 16, 1);
+		END
+		
+END
+GO
