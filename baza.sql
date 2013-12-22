@@ -234,7 +234,7 @@ BEGIN
 	begin catch
 		declare @error as varchar(127)
 		set @error = (Select ERROR_MESSAGE())
-		RAISERROR('Nie mozna dodac osoby-klienta, blad danych. %s', 16, 1, @error);
+		RAISERROR('Nie mozna dodac klienta, blad danych. %s', 16, 1, @error);
 		ROLLBACK TRAN
 	end catch
 END
