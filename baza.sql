@@ -214,29 +214,32 @@ AS
 BEGIN
 
 	SET NOCOUNT ON;
-	declare @ID_Osoby as int;
-	declare @ID_Klienta as int;
-	declare @ID_DanychAdresowych  as int;
+	DECLARE @ID_Osoby AS INT;
+	DECLARE @ID_Klienta AS INT;
+	DECLARE @ID_DanychAdresowych  AS INT;
 	
-	begin try
-		begin tran 
+	BEGIN TRY
+		BEGIN TRAN 
 
-		execute nowy_adres @Adres, @Miasto, @KodPocztowy, @Kraj;
-		set @ID_DanychAdresowych = @@IDENTITY;
+		EXECUTE nowy_adres @Adres, @Miasto, @KodPocztowy, @Kraj;
+		SET @ID_DanychAdresowych = @@IDENTITY;
 		
 		INSERT INTO Klient VALUES(0);
-		set @ID_Klienta = @@IDENTITY;
+		SET @ID_Klienta = @@IDENTITY;
 		
 		INSERT INTO Osoba
 		VALUES(@ID_Klienta,@ID_DanychAdresowych, @Imie, @Nazwisko, @NrAlbumu, @Telefon, @Email);
 		COMMIT TRAN
-	end try
-	begin catch
-		declare @error as varchar(127)
-		set @error = (Select ERROR_MESSAGE())
+	END TRY
+	
+	BEGIN CATCH
+	
+		DECLARE @error as varchar(127)
+		SET @error = (Select ERROR_MESSAGE())
 		RAISERROR('Nie mozna dodac klienta, blad danych. %s', 16, 1, @error);
 		ROLLBACK TRAN
-	end catch
+		
+	END CATCH
 END
 GO
 
@@ -249,7 +252,7 @@ AS
 BEGIN
 
 	SET NOCOUNT ON;
-		IF (select Osoba.ID_Klienta from Osoba where Osoba.ID_Osoby = @ID_Osoby) is null
+		IF (SELECT Osoba.ID_Klienta FROM Osoba WHERE Osoba.ID_Osoby = @ID_Osoby) is null
 		BEGIN
 			INSERT INTO Klient VALUES (0)
 			UPDATE Osoba
@@ -263,3 +266,83 @@ BEGIN
 		
 END
 GO
+GO
+CREATE PROCEDURE dodaj_klienta_firma(
+	-- parametry
+	@NIP varchar(20),
+	@NazwaFirmy nvarchar(45),
+	@Telefon NVARCHAR(25) = NULL,
+	@Fax NVARCHAR(24) = NULL,
+	@Email NVARCHAR(45) = NULL,
+	@Adres NVARCHAR(60),
+	@Miasto NVARCHAR(15),
+	@KodPocztowy NVARCHAR(10),
+	@Kraj NVARCHAR(15))
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+	DECLARE @ID_DanychAdresowych  AS INT;
+	DECLARE @ID_Klienta AS INT;
+	BEGIN TRY
+
+		EXECUTE nowy_adres @Adres,@Miasto,@KodPocztowy,@Kraj;
+		SET @ID_DanychAdresowych = @@IDENTITY;
+		 
+		INSERT INTO Klient VALUES(0);
+		SET @ID_Klienta = @@IDENTITY;
+		
+		INSERT INTO Firma
+		VALUES(@NIP,@ID_Klienta,@ID_DanychAdresowych, @NazwaFirmy,@Telefon,@Fax,@Email);
+	
+	END TRY
+	
+	BEGIN CATCH
+	
+		DECLARE @error AS VARCHAR(127)
+		SET @error = (SELECT ERROR_MESSAGE() AS error_message)
+		RAISERROR('Nie mozna dodac firmy, blad danych. %s', 16, 1,@error);
+		
+	END CATCH
+	
+END
+GO
+
+CREATE PROCEDURE dodaj_osobe (
+	@Imie NVARCHAR(20),
+	@Nazwisko NVARCHAR(20),
+	@NrAlbumu NVARCHAR(6) = null,
+	@Telefon NVARCHAR(25) = null,
+	@Email NVARCHAR(45) = null,
+	@Adres NVARCHAR(60),
+	@Miasto NVARCHAR(15),
+	@KodPocztowy NVARCHAR(10),
+	@Kraj NVARCHAR(15))
+AS
+	SET NOCOUNT ON;
+	DECLARE @ID_DanychAdresowych AS INT;
+	BEGIN TRY
+	
+		SET NOCOUNT ON;
+		BEGIN TRAN
+
+		EXECUTE nowy_adres @Adres,@Miasto,@KodPocztowy,@Kraj;
+		set @ID_DanychAdresowych = @@IDENTITY;
+		
+		INSERT INTO Osoba
+		VALUES(NULL,@ID_DanychAdresowych, @Imie, @Nazwisko, @NrAlbumu, @Telefon, @Email);
+		COMMIT TRAN
+		
+	END TRY
+	
+	BEGIN CATCH
+	
+		DECLARE @error AS VARCHAR(127)
+		SET @error = (Select ERROR_MESSAGE())
+		RAISERROR('Nie mozna dodac osoby, blad danych. %s', 16, 1, @error);
+		ROLLBACK TRAN
+		
+	END CATCH
+END
+GO
+
