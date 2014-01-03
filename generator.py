@@ -21,7 +21,6 @@ tematy_warsztatow = [line.strip() for line in open('tematy_w.txt')]
 def generuj_adres():
 	
 	ulica = "\"" + ulice[randint(0,len(ulice)-1)] + ' ' + str(randint(1,200)) + "\""
-	
 	m_k = random.sample(miasta_kody.items(),1)
 	for item in m_k:
 		miasto = "\"" + str(item[0]) + "\""

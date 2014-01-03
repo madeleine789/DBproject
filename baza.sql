@@ -5,17 +5,27 @@ GO
 USE Konferencje
 GO
 
-CREATE TABLE ProgiCenowe ( 
-	ID_ProguCenowego INT PRIMARY KEY NOT NULL,
+CREATE TABLE Prog ( 
+	ID_Progu INT PRIMARY KEY NOT NULL,
 	ProcentCeny SMALLINT NOT NULL CHECK(ProcentCeny > 0),
-	Opis TEXT NOT NULL
+	ProgCzasowy SMALLINT NOT NULL
 )
 
-INSERT INTO ProgiCenowe (ID_ProguCenowego,ProcentCeny,Opis) VALUES (1, 90,'3 miesiace przed')
+CREATE TABLE ProgiCenowe (
+	ID_Progu INT UNIQUE FOREIGN KEY REFERENCES Prog(ID_Progu) NOT NULL,
+	ID_Konferencji INT UNIQUE FOREIGN KEY REFERENCES Konferencja(ID_Konferencji) NOT NULL,
+	PRIMARY KEY(ID_Progu, ID_Konferencji)
+)
+
+CREATE TABLE ZnizkaStudencka (
+	ProcentZnizki SMALLINT
+)
+
+INSERT INTO Prog (ID_Progu, ProcentCeny, ProgCzasowy) VALUES (1, 90, 3)
 GO
-INSERT INTO ProgiCenowe (ID_ProguCenowego,ProcentCeny,Opis) VALUES (2, 100,'2 miesiace przed')
+INSERT INTO Prog (ID_Progu, ProcentCeny, ProgCzasowy) VALUES (2, 100, 2)
 GO
-INSERT INTO ProgiCenowe (ID_ProguCenowego,ProcentCeny,Opis) VALUES (3, 110,'1 miesiac przed')
+INSERT INTO Prog (ID_Progu, ProcentCeny, ProgCzasowy) VALUES (3, 110, 1)
 GO
 
 CREATE TABLE StatusKonferencji (
@@ -121,7 +131,7 @@ CREATE TABLE DzienKonferencji (
 	ID_DniaKonferencji INT IDENTITY(1,1) PRIMARY KEY  NOT NULL,
 	ID_Konferencji INT FOREIGN KEY REFERENCES Konferencja(ID_Konferencji) NOT NULL,
 	DzienKonferencji DATE NOT NULL,
-	LimitMiejsc SMALLINT NOT NULL CHECK(LimitMiejsc > 0)
+	LimitMiejscKonferencja SMALLINT NOT NULL CHECK(LimitMiejscKonferencja > 0)
 )
 
 CREATE TABLE TematWarsztatu (
@@ -134,7 +144,7 @@ CREATE TABLE Warsztat (
 	ID_TematuWarsztatu INT FOREIGN KEY REFERENCES TematWarsztatu(ID_TematuWarsztatu) NOT NULL,
 	ID_DniaKonferencji INT FOREIGN KEY REFERENCES DzienKonferencji(ID_DniaKonferencji) NOT NULL,
 	Cena MONEY NOT NULL CHECK(Cena > 0),
-	LimitMIejsc SMALLINT NOT NULL CHECK(LimitMiejsc > 0),
+	LimitMiejscWarsztat SMALLINT NOT NULL CHECK(LimitMiejscWarsztat > 0),
 	GodzinaRozpoczecia TIME NOT NULL,
 	GodzinaZakonczenia TIME NOT NULL
 	
@@ -198,7 +208,7 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE dodaj_klienta_prywatnego
+CREATE PROCEDURE dodaj_klienta_osoba
 
 	@Imie NVARCHAR(20),
 	@Nazwisko NVARCHAR(20),
@@ -246,7 +256,7 @@ GO
 
 GO
 CREATE PROCEDURE dodaj_osobe_jako_klienta
-	@ID_Osoby int
+	@ID_Osoby INT
 		
 AS
 BEGIN
@@ -254,7 +264,7 @@ BEGIN
 	SET NOCOUNT ON;
 		IF (SELECT Osoba.ID_Klienta FROM Osoba WHERE Osoba.ID_Osoby = @ID_Osoby) is null
 		BEGIN
-			INSERT INTO Klient VALUES (0)
+			INSERT INTO Klient(CzyFirma) VALUES (0)
 			UPDATE Osoba
 			SET ID_Klienta = @@IDENTITY
 			WHERE Osoba.ID_Osoby = @ID_Osoby 
@@ -277,20 +287,22 @@ CREATE PROCEDURE dodaj_klienta_firma(
 	@Adres NVARCHAR(60),
 	@Miasto NVARCHAR(15),
 	@KodPocztowy NVARCHAR(10),
-	@Kraj NVARCHAR(15))
+	@Kraj NVARCHAR(15)
 AS
 BEGIN
 
 	SET NOCOUNT ON;
 	DECLARE @ID_DanychAdresowych  AS INT;
 	DECLARE @ID_Klienta AS INT;
+	
 	BEGIN TRY
 
 		EXECUTE nowy_adres @Adres,@Miasto,@KodPocztowy,@Kraj;
 		SET @ID_DanychAdresowych = @@IDENTITY;
 		 
-		INSERT INTO Klient VALUES(0);
+		INSERT INTO Klient(CzyFirma) VALUES(1);
 		SET @ID_Klienta = @@IDENTITY;
+		
 		
 		INSERT INTO Firma
 		VALUES(@NIP,@ID_Klienta,@ID_DanychAdresowych, @NazwaFirmy,@Telefon,@Fax,@Email);
@@ -327,7 +339,7 @@ AS
 		BEGIN TRAN
 
 		EXECUTE nowy_adres @Adres,@Miasto,@KodPocztowy,@Kraj;
-		set @ID_DanychAdresowych = @@IDENTITY;
+		SET @ID_DanychAdresowych = @@IDENTITY;
 		
 		INSERT INTO Osoba
 		VALUES(NULL,@ID_DanychAdresowych, @Imie, @Nazwisko, @NrAlbumu, @Telefon, @Email);
@@ -345,4 +357,238 @@ AS
 	END CATCH
 END
 GO
+CREATE PROCEDURE dodaj_pracownika
 
+	@NIP INT,
+	@ID_Osoby INT
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+		INSERT INTO Pracownik(NIP,ID_Osoby)
+		VALUES(@ID_Osoby, @ID_ZamowieniaSzczegolowego);
+
+END
+GO
+
+
+GO
+CREATE PROCEDURE dodaj_konferencje
+	-- parametry
+	@ID_TematuKonferencji INT,
+	@DataRozpoczecia DATE,
+	@DataZakonczenia DATE,
+	@CenaKonferencji MONEY,
+	@StatusKonferencji VARCHAR(10)
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+	begin try
+		INSERT INTO Konferencja
+		VALUES(@ID_TematuKonferencji, @DataRozpoczecia, @DataZakonczenia,@CenaKonferencji,@StatusKonferencji);
+	end try
+	begin catch
+		declare @error as varchar(127)
+		set @error = (Select ERROR_MESSAGE())
+		RAISERROR('Nie mo¿na dodac konferencji. %s', 16, 1, @error);
+	end catch
+END
+GO
+GO 
+CREATE PROCEDURE dodaj_temat_konferencji
+
+	@Opis TEXT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	DECLARE @ID_TematuKonferencji AS INT
+	BEGIN TRY
+		INSERT INTO TematKonferencji(Opis) VALUES(@Opis)
+		SET @ID_TematuKonferencji = @@IDENTITY
+	END TRY
+	BEGIN CATCH
+	
+		DECLARE @error AS VARCHAR(127)
+		SET @error = (Select ERROR_MESSAGE())
+		RAISERROR('Nie mozna dodac tematu, blad danych. %s', 16, 1, @error);
+		
+	END CATCH
+END
+GO
+GO
+CREATE PROCEDURE dodaj_warsztat
+	-- parametry
+	@ID_TematuWarsztatu INT,
+	@ID_DniaKonferencji DATE,
+	@CenaWarsztatu MONEY,
+	@GodzRozpoczecia TIME,
+	@GodzinaZakonczenia TIME
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+	begin try
+		INSERT INTO Warsztat
+		VALUES(@ID_TematuWarsztatu, @ID_DniaKonferencji, @CenaWarsztatu, @GodzRozpoczecia, @GodzinaZakonczenia);
+	end try
+	begin catch
+		declare @error as varchar(127)
+		set @error = (Select ERROR_MESSAGE())
+		RAISERROR('Nie mozna dodac warsztatu. %s', 16, 1, @error);
+	end catch
+END
+GO
+GO 
+CREATE PROCEDURE dodaj_temat_warsztatu
+
+	@Opis TEXT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	BEGIN TRY
+		INSERT INTO TematWarsztatu(Opis) VALUES(@Opis)
+	END TRY
+	BEGIN CATCH
+	
+		DECLARE @error AS VARCHAR(127)
+		SET @error = (Select ERROR_MESSAGE())
+		RAISERROR('Nie mozna dodac tematu. %s', 16, 1, @error);
+		
+	END CATCH
+END
+GO
+GO
+CREATE PROCEDURE dodaj_dzien_konferencji
+	-- parametry
+	@ID_Konferencji INT,
+	@DzienKonferencji DATE,
+	@LimitMiejscKonferencja SMALLINT
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+	begin try
+		INSERT INTO DzienKonferencji
+		VALUES(@ID_Konferencji, @DzienKonferencji, @LimitMiejscKonferencji);
+	end try
+	begin catch
+		declare @error as varchar(127)
+		set @error = (Select ERROR_MESSAGE())
+		RAISERROR('Nie mo¿na dodac dnia konferencji. %s', 16, 1, @error);
+	end catch
+END
+GO
+GO
+CREATE PROCEDURE dodaj_zamowienie(
+	-- parametry
+	@ID_Klienta INT,
+	@ID_Konferencji INT,
+	@DataZlozeniaZamowienia DATE,
+	@StatusRejestracji NVARCHAR(10),
+	@StatusRezerwacji BIT,
+	@DoZapltay MONEY,
+	@Zaplacono MONEY,
+	@TerminPlatnosci DATE,
+	@StatusPlatnosci NVARCHAR(10)
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+	
+	BEGIN TRY
+
+		INSERT INTO Zamowienie
+		VALUES(@ID_Klienta, @ID_Konferencji, @DataZlozeniaZamowienia, @StatusRejestracji, @StatusRezerwacji, @DoZapltay, @Zaplacono, @TerminPlatnosci, @StatusPlatnosci)
+	
+	END TRY
+	
+	BEGIN CATCH
+	
+		DECLARE @error AS VARCHAR(127)
+		SET @error = (SELECT ERROR_MESSAGE() AS error_message)
+		RAISERROR('Nie mozna dodac firmy, blad danych. %s', 16, 1,@error);
+		
+	END CATCH
+	
+END
+GO
+CREATE PROCEDURE dodaj_zamowienie_szcz
+	@ID_Zamowienia INT,
+	@ID_DniaKonferencji INT,
+	@LiczbaMiejscKonferencja SMALLINT
+		
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+		IF (SELECT Zamowienie.ID_Zamowienia FROM Zamowienie WHERE Zamowienie.ID_Zamowienia = @ID_Zamowienia) IS NOT NULL)
+		BEGIN
+			INSERT INTO ZamowienieSzczegolowe
+			VALUES (@ID_Zamowienia, @ID_DniaKonferencji, @LiczbaMiejscKonferencja)
+
+		END
+		ELSE
+		BEGIN
+			RAISERROR('Nie ma takiego zamowienia. ', 16, 1);
+		END
+		
+END
+GO
+GO
+CREATE PROCEDURE dodaj_zamowienie_warsztatu
+	@ID_ZamSzczegolowego INT,
+	@ID_Warsztatu INT, 
+	@LiczbaMiejscWarsztat SMALLINT, 
+	@StatusRezerwacji BIT
+		
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+		IF (SELECT ZamowienieSzczegolowe.ID_ZamSzczegolowe FROM ZamowienieSzczegolowe WHERE Zamowienie.ID_ZamSzczegolowego = @ID_ZamSzczegolowego) IS NOT NULL)
+		BEGIN
+			INSERT INTO ZamowienieWarsztatu
+			VALUES (@ID_ZamSzczegolowego, @ID_Warsztatu, @LiczbaMiejscWarsztat, @StatusRezerwacji)
+
+		END
+		ELSE
+		BEGIN
+			RAISERROR('Nie ma takiego zamowienia. ', 16, 1);
+		END
+		
+END
+GO
+GO
+CREATE PROCEDURE dodaj_uczestnika_konferencji
+
+	@ID_Osoby INT,
+	@ID_ZamowieniaSzczegolowego INT
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+		INSERT INTO UczestnikKonferencji(ID_Osoby,ID_ZamSzczegolowego)
+		VALUES(@ID_Osoby, @ID_ZamowieniaSzczegolowego);
+
+END
+GO
+GO
+CREATE PROCEDURE dodaj_uczestnika_warsztatu
+
+	@ID_UczestnikaKonferencji INT,
+	@ID_ZamowieniaWarsztatu INT
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+		INSERT INTO UczestnikWarsztatu
+		VALUES(@ID_UczestnikaKonferencji,@ID_ZamowieniaWarsztatu);
+END
+GO
