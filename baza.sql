@@ -29,6 +29,7 @@ GO
 INSERT INTO Prog (ID_Progu, ProcentCeny, ProgCzasowy) VALUES (3, 110, 1)
 GO
 
+
 CREATE TABLE StatusKonferencji (
 	ID_StatusuKonferencji SMALLINT PRIMARY KEY NOT NULL,
 	StatusKonferencji NVARCHAR(15) NOT NULL
