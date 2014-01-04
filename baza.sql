@@ -1,5 +1,4 @@
 
-
 CREATE DATABASE Konferencje
 GO
 USE Konferencje
@@ -8,7 +7,8 @@ GO
 CREATE TABLE Prog ( 
 	ID_Progu INT PRIMARY KEY NOT NULL,
 	ProcentCeny SMALLINT NOT NULL CHECK(ProcentCeny > 0),
-	ProgCzasowy SMALLINT NOT NULL
+	GornyProgCzasowy SMALLINT NOT NULL
+	DolnyProgCzasowy SMALLINT NOT NULL
 )
 
 CREATE TABLE ProgiCenowe (
@@ -21,6 +21,8 @@ CREATE TABLE ZnizkaStudencka (
 	ProcentZnizki SMALLINT
 )
 
+INSERT INTO ZnizkaStudencka (ProcentZnizki) VALUES (50)
+GO
 INSERT INTO Prog (ID_Progu, ProcentCeny, ProgCzasowy) VALUES (1, 90, 3)
 GO
 INSERT INTO Prog (ID_Progu, ProcentCeny, ProgCzasowy) VALUES (2, 100, 2)
@@ -393,7 +395,7 @@ BEGIN
 	begin catch
 		declare @error as varchar(127)
 		set @error = (Select ERROR_MESSAGE())
-		RAISERROR('Nie mo¿na dodac konferencji. %s', 16, 1, @error);
+		RAISERROR('Nie moï¿½na dodac konferencji. %s', 16, 1, @error);
 	end catch
 END
 GO
@@ -479,7 +481,7 @@ BEGIN
 	begin catch
 		declare @error as varchar(127)
 		set @error = (Select ERROR_MESSAGE())
-		RAISERROR('Nie mo¿na dodac dnia konferencji. %s', 16, 1, @error);
+		RAISERROR('Nie moï¿½na dodac dnia konferencji. %s', 16, 1, @error);
 	end catch
 END
 GO
