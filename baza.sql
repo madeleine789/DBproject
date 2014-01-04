@@ -1,26 +1,27 @@
-
-
 CREATE DATABASE Konferencje
 GO
 USE Konferencje
 GO
 
-CREATE TABLE Prog ( 
-	ID_Progu INT PRIMARY KEY NOT NULL,
-	ProcentCeny SMALLINT NOT NULL CHECK(ProcentCeny > 0),
-	ProgCzasowy SMALLINT NOT NULL
+CREATE TABLE Prog (
+        ID_Progu INT PRIMARY KEY NOT NULL,
+        ProcentCeny SMALLINT NOT NULL CHECK(ProcentCeny > 0),
+        GornyProgCzasowy SMALLINT NOT NULL
+        DolnyProgCzasowy SMALLINT NOT NULL
 )
 
 CREATE TABLE ProgiCenowe (
-	ID_Progu INT UNIQUE FOREIGN KEY REFERENCES Prog(ID_Progu) NOT NULL,
-	ID_Konferencji INT UNIQUE FOREIGN KEY REFERENCES Konferencja(ID_Konferencji) NOT NULL,
-	PRIMARY KEY(ID_Progu, ID_Konferencji)
+        ID_Progu INT UNIQUE FOREIGN KEY REFERENCES Prog(ID_Progu) NOT NULL,
+        ID_Konferencji INT UNIQUE FOREIGN KEY REFERENCES Konferencja(ID_Konferencji) NOT NULL,
+        PRIMARY KEY(ID_Progu, ID_Konferencji)
 )
 
 CREATE TABLE ZnizkaStudencka (
-	ProcentZnizki SMALLINT
+        ProcentZnizki SMALLINT
 )
 
+INSERT INTO ZnizkaStudencka (ProcentZnizki) VALUES (50)
+GO
 INSERT INTO Prog (ID_Progu, ProcentCeny, ProgCzasowy) VALUES (1, 90, 3)
 GO
 INSERT INTO Prog (ID_Progu, ProcentCeny, ProgCzasowy) VALUES (2, 100, 2)
