@@ -1,6 +1,9 @@
 CREATE DATABASE Konferencje
 GO
 
+USE Konferencje
+GO
+
 CREATE TABLE ZnizkaStudencka (
         ProcentZnizki SMALLINT
 )
