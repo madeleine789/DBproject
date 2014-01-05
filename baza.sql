@@ -175,7 +175,7 @@ GO
 CREATE TABLE Prog (
         ID_Progu INT PRIMARY KEY NOT NULL,
         ProcentCeny SMALLINT NOT NULL CHECK(ProcentCeny > 0),
-        GornyProgCzasowy SMALLINT NOT NULL,
+        GornyProgCzasowy SMALLINT,
         DolnyProgCzasowy SMALLINT NOT NULL
 )
 
