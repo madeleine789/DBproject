@@ -391,7 +391,7 @@ def generuj_plik(filename):
             for kl in l_klientow:
 
             	zam = kl['zamowienie']
-                f.write('EXEC dodaj zamowienie ' + str(zam['id_klienta']) + ', ' + str(zam['id_konferencji']) + ', ' + zam['data_zl_zam'] + ', ' + zam['status_rejestracji'] + ', ' + str(zam['status_rezerwacji']) + ', ' +str(zam['do_zaplaty']) + ', ' + str(zam['zaplacono']) + ', ' + zam['termin_platnosci'] + ', ' + str(zam['status_platnosci']) + '\n' )
+                f.write('EXEC dodaj_zamowienie ' + str(zam['id_klienta']) + ', ' + str(zam['id_konferencji']) + ', ' + zam['data_zl_zam'] + ', ' + zam['status_rejestracji'] + ', ' + str(zam['status_rezerwacji']) + ', ' +str(zam['do_zaplaty']) + ', ' + str(zam['zaplacono']) + ', ' + zam['termin_platnosci'] + ', ' + str(zam['status_platnosci']) + '\n' )
                 for zam_s in zam['zamowienia_szczegolowe']:
                 		f.write('EXEC dodaj_zamowienie_szcz ' + zam_s['id_zamowienia'] + ', ' + zam_s['id_dnia'] + ', ' + zam_s['liczba_miejsc_konf'] + '\n')
                 		if 'imie' in kl:
@@ -430,7 +430,7 @@ if __name__ == "__main__":
 
 	generuj_plik('dane.sql')
 
-	#print generuj_konferencja(1,2,1,1,1,1,1)
+#print generuj_konferencja(1,2,1,1,1,1,1)
 #print generuj_daty_konf('1/1/2009', '3/1/2014',random.random())
 
 #print '\n'
