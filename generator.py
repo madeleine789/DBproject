@@ -391,13 +391,13 @@ def generuj_plik(filename):
             for kl in l_klientow:
 
             	zam = kl['zamowienie']
-                f.write('EXEC dodaj_zamowienie ' + str(zam['id_klienta']) + ', ' + str(zam['id_konferencji']) + ', ' + zam['data_zl_zam'] + ', ' + zam['status_rejestracji'] + ', ' + str(zam['status_rezerwacji']) + ', ' +str(zam['do_zaplaty']) + ', ' + str(zam['zaplacono']) + ', ' + zam['termin_platnosci'] + ', ' + str(zam['status_platnosci']) + '\n' )
+                f.write('EXEC dodaj_zamowienie ' + str(zam['id_klienta']) + ', ' + str(zam['id_konferencji']) + ', ' + "\""+zam['data_zl_zam']+ "\""+ ', ' + zam['status_rejestracji'] + ', ' + str(zam['status_rezerwacji']) + ', ' +str(zam['do_zaplaty']) + ', ' + str(zam['zaplacono']) + ', ' + "\"" + zam['termin_platnosci'] + "\""+ ', ' + str(zam['status_platnosci']) + '\n' )
                 for zam_s in zam['zamowienia_szczegolowe']:
                 		f.write('EXEC dodaj_zamowienie_szcz ' + zam_s['id_zamowienia'] + ', ' + zam_s['id_dnia'] + ', ' + zam_s['liczba_miejsc_konf'] + '\n')
                 		if 'imie' in kl:
                 			f.write('EXEC dodaj_uczestnika_konferencji ' + str(kl['id_osoby']) + ', ' + str(zam_s['id_zamszczegolowego']) + '\n')
                 		for zam_w in zam_s['zamowienia_warsztatow']:
-                			f.write('EXEC dodaj_zamowienie_warsztatu ' + ', ' + str(zam_w['id_zamszczegolowego']) + ', ' + str(zam_w['id_warsztatu']) + ', ' + str(zam_w['liczba_msc']) + ', ' + str(zam_w['status_rezerwacji']) + '\n')
+                			f.write('EXEC dodaj_zamowienie_warsztatu ' + str(zam_w['id_zamszczegolowego']) + ', ' + str(zam_w['id_warsztatu']) + ', ' + str(zam_w['liczba_msc']) + ', ' + str(zam_w['status_rezerwacji']) + '\n')
                 			if 'imie' in kl:
                 				f.write('EXEC dodaj_uczestnika_warsztatu ' + str(kl['id_uczestnika']) + ', ' + str(zam_w['id_warsztatu']) + '\n')
                 if 'pracownicy' in kl:
