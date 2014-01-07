@@ -4,16 +4,20 @@ import time
 import datetime
 
 
+
 imiona_meskie = [line.strip() for line in open('im_m.txt')]
 imiona_zenskie = [line.strip() for line in open('im_z.txt')]
 nazwiska = [line.strip() for line in open('nazw.txt')]
+
 firmy = [line.strip() for line in open('firmy.txt')]
+
 ulice = [line.strip() for line in open('ulice.txt')]
 miasta = [line.strip() for line in open('miasta.txt')]
 miasta_kody = {}
 for i in miasta:
 	miasto, kod = i.split(' ')
 	miasta_kody[miasto] = kod
+
 tematy_konferencji = [line.strip() for line in open('tematy_k.txt')]
 tematy_warsztatow = [line.strip() for line in open('tematy_w.txt')]
 
@@ -34,14 +38,20 @@ def generuj_adres():
 
 	return ulica + ', ' + miasto + ', ' + kod + ', ' + "\"" + 'Polska' + "\""
 
+
 def generuj_firme():
 
 	NIP = str(randint(1000000000,9999999999)) + str(randint(1000000000,9999999999))
+
 	nazwa = "\"" + firmy[randint(0,len(firmy)-1)] + "\""
+
 	telefon = "\"" + str(randint(100000000,999999999)) +  "\""
+
 	fax = "\"" + str(randint(100000000,999999999)) +  "\""
+
 	email = "\"" + str(nazwa[0:6].lower().strip('\"')) + '@jestemailem.pl' + "\""
 	#return str(NIP) + ', ' + str(nazwa) + ', ' + str(telefon) + ', ' + str(fax) + ', ' + str(email)
+
 	firma = {}
 	firma['NIP'] = NIP
 	firma['nazwa'] = nazwa
@@ -50,6 +60,7 @@ def generuj_firme():
 	firma['email'] = email
 
 	return firma
+
 
 def generuj_osobe():
 
@@ -84,7 +95,7 @@ def generuj_daty_konf(start,end,p):
 
     def daty_konf(start,end,format,p):
 
-        dict_kalendarz = {}
+        konf_kalendarz = {}
 
         start_t = time.mktime(time.strptime(start,format))
         end_t = time.mktime(time.strptime(end,format))
@@ -93,12 +104,12 @@ def generuj_daty_konf(start,end,p):
         l_dni = random.sample(set([0,86400,172800]),1)
         rand_et = rand_st + float(l_dni[0])
         
-        days = []
-        date = datetime.datetime.fromtimestamp(rand_st).date()
-        while (date <= datetime.datetime.fromtimestamp(rand_et).date()):
-            date_str = date.strftime('%m/%d/%Y')
-            days.append(date_str)
-            date += datetime.timedelta(days=1)
+        dni = []
+        data = datetime.datetime.fromtimestamp(rand_st).date()
+        while (data <= datetime.datetime.fromtimestamp(rand_et).date()):
+            data_str = data.strftime('%m/%d/%Y')
+            dni.append(data_str)
+            data += datetime.timedelta(days=1)
             
         if (datetime.date.today() - datetime.datetime.fromtimestamp(rand_st).date()).days  >= 0:
             status = '\"skompletowany\"'
@@ -109,16 +120,16 @@ def generuj_daty_konf(start,end,p):
         else:
             status = '\"zamkniety\"'
 
-        dict_kalendarz['lista_dni'] = days
-        dict_kalendarz['liczba_dni'] = 1 + int((rand_et - rand_st)/86400)
-        dict_kalendarz['status'] = status
+        konf_kalendarz['lista_dni'] = dni
+        konf_kalendarz['liczba_dni'] = 1 + int((rand_et - rand_st)/86400)
+        konf_kalendarz['status'] = status
 
-        return dict_kalendarz
+        return konf_kalendarz
 
     return daty_konf(start, end, '%m/%d/%Y', p)
 
 
-def generuj_konferencja(id_konferencji, id_warsztatu, id_dnia, id_osoby, id_klienta, id_zamowienia, id_zamszczegolowego):
+def generuj_konferencja(id_konferencji,id_warsztatu,id_dnia,id_osoby,id_klienta,id_zamowienia,id_zamszczegolowego):
 
 	id_uczestnika = 1
 	konferencja = {}
@@ -166,8 +177,8 @@ def generuj_konferencja(id_konferencji, id_warsztatu, id_dnia, id_osoby, id_klie
 	klienci = []
 
 
-	#for i in xrange(0,int(limit_miejsc_k/2)):
-	for i in xrange(50):
+	for i in xrange(0,int(limit_miejsc_k/2)):
+	#for i in xrange(50):
 		klient = {}
 		dane = generuj_osobe()
 		
@@ -177,7 +188,7 @@ def generuj_konferencja(id_konferencji, id_warsztatu, id_dnia, id_osoby, id_klie
 		klient['id_klienta'] = id_kl
 		klient['id_osoby']  = id_os
 		klient['id_uczestnika'] = id_uczestnika
-		klient['zamowienie'] = generuj_zamowienie(id_zamowienia, id_zamszczegolowego, id_kl, konferencja, konferencja['lista_dni'])
+		klient['zamowienie'] = generuj_zamowienie(id_zamowienia, id_zamszczegolowego, klient, konferencja, konferencja['lista_dni'])
 		klienci.append(klient)
 		id_uczestnika += 1
 		id_zamowienia += 1
@@ -185,8 +196,8 @@ def generuj_konferencja(id_konferencji, id_warsztatu, id_dnia, id_osoby, id_klie
 		id_kl += 1
 		id_os += 1
 
-	#for i in xrange(0,int(limit_miejsc_k/8)):
-	for i in xrange(0,15):
+	for i in xrange(0,int(limit_miejsc_k/8)):
+	#for i in xrange(0,15):
 		klient = {}
 		dane = generuj_firme()
 		
@@ -208,7 +219,7 @@ def generuj_konferencja(id_konferencji, id_warsztatu, id_dnia, id_osoby, id_klie
 			id_os += 1
 			pracownicy.append(pracownik)
 		klient['pracownicy'] = pracownicy
-		klient['zamowienie'] = generuj_zamowienie(id_zamowienia, id_zamszczegolowego, id_kl, konferencja, konferencja['lista_dni'])
+		klient['zamowienie'] = generuj_zamowienie(id_zamowienia, id_zamszczegolowego, klient, konferencja, konferencja['lista_dni'])
 		klienci.append(klient)
 		id_zamowienia += 1
 		id_zamszczegolowego += 1
@@ -221,11 +232,12 @@ def generuj_konferencja(id_konferencji, id_warsztatu, id_dnia, id_osoby, id_klie
 	konferencja['id_zamszczegolowego'] = id_zamszczegolowego
 	konferencja['klienci'] = klienci
 
+	print limit_miejsc_k
 
 	return konferencja
-	#return id_tematu + ', ' + data_rozp + ', ' + data_zak + ', ' + "\"" + str(cena) + "\"" + ', ' + status
 
-def generuj_konferencje():
+
+def generuj_konferencje(l_konferencji = 10):
 
 	id_dnia = 1
 	id_osoby = 1
@@ -233,8 +245,9 @@ def generuj_konferencje():
 	id_zamszczegolowego = 1
 	id_zamowienia = 1
 	id_warsztatu = 1
+
 	konferencje = []
-	for i in xrange(1,10):
+	for i in xrange(1,l_konferencji):
 		id_konferencji = i
 		konferencja = generuj_konferencja(id_konferencji, id_warsztatu, id_dnia, id_osoby, id_klienta, id_zamowienia, id_zamszczegolowego)
 		id_dnia = konferencja['id_dnia']
@@ -242,14 +255,15 @@ def generuj_konferencje():
 	
 	return konferencje
 
-def generuj_godziny(godz_rozp, format):
-    
 
+def generuj_godziny(godz_rozp,format):
+    
     delta_1 = random.randint(0,420)
     while delta_1 % 5 != 0: delta_1 = random.randint(0,420)
     delta_2 = random.sample(set([90,120,150]), 1)[0]
     godz_r = datetime.datetime.strptime(godz_rozp, format) + datetime.timedelta(minutes = delta_1)
     godz_z = godz_r + datetime.timedelta(minutes=delta_2)
+    
     godziny = {}
     godziny['godz_rozp'] = "\"" + str(datetime.datetime.strftime(godz_r,format)) + "\""
     godziny['godz_zak'] = "\"" + str(datetime.datetime.strftime(godz_z,format)) + "\""
@@ -257,47 +271,51 @@ def generuj_godziny(godz_rozp, format):
     
     return godziny
 
+
 def generuj_warsztat(id_dnia, id_warsztatu):
 	
-	warsztat = {}
 	godziny = generuj_godziny("10:00:00", "%H:%M:%S")
+
+	warsztat = {}
 	warsztat['id_dnia'] = str(id_dnia)
 	warsztat['id_tematu'] = str(random.randint(1, len(tematy_warsztatow)))
 	warsztat['godz_rozp'] = godziny['godz_rozp']
 	warsztat['godz_zak'] = godziny['godz_zak']
 	warsztat['id_warsztatu'] = id_warsztatu
+
 	if godziny['czas_trw'] == 90 : warsztat['cena'] = str(random.randint(100,200))
 	elif godziny['czas_trw'] == 120 : warsztat['cena'] = str(random.randint(200,300))
 	else: warsztat['cena'] = str(random.randint(300,400))
 
-
 	return warsztat
+
 
 def generuj_tematy_konferencji():
 
-	t_konf = []
+	tematy_konf = []
 	for temat in tematy_konferencji:
-		t_konf.append("\"" + temat + "\"")
-	return t_konf
+		tematy_konf.append("\"" + temat + "\"")
+	return tematy_konf
+
 
 def generuj_tematy_warsztatow():
-	t_warsz = []
+	
+	tematy_warsz = []
 	for temat in tematy_warsztatow:
-		t_warsz.append("\"" + temat + "\"")
-	return t_warsz		
+		tematy_warsz.append("\"" + temat + "\"")
+	return tematy_warsz		
 
 
 def generuj_daty_zamowien(start, format):
     
-
     data_rozp = datetime.datetime.strptime(start, format)
     time_delta  = random.randint(20, 90)
+    data_zlozenia_zam = data_rozp - datetime.timedelta(days=time_delta)
+    termin_zaplaty = data_rozp - datetime.timedelta(days=7)  
     if time_delta <=30: procent_ceny = 1.10
     elif time_delta <=60: procent_ceny = 1.00
     else: procent_ceny = 0.9
-    data_zlozenia_zam = data_rozp - datetime.timedelta(days=time_delta)
-    termin_zaplaty = data_rozp - datetime.timedelta(days=7)           
-
+         
     zam_kalendarz = {}
     zam_kalendarz['procent_ceny'] = procent_ceny
     zam_kalendarz['data_zlozenia_zam'] = datetime.datetime.strftime(data_zlozenia_zam,format)
@@ -305,18 +323,20 @@ def generuj_daty_zamowien(start, format):
     
     return zam_kalendarz
 
-def generuj_zamowienie(ID_Zamowienia, ID_ZamSzczegolowego, ID_Klienta, konferencja, lista_dni):
+
+def generuj_zamowienie(ID_Zamowienia,ID_ZamSzczegolowego,klient,konferencja,lista_dni):
 	
 	daty = generuj_daty_zamowien(konferencja['data_rozp'].strip("\""), "%m/%d/%Y")
 	zamowienie = {}
 	id_zamszczegolowego =  ID_ZamSzczegolowego
-	zamowienie['id_zamowienia'] = ID_Zamowienia
-	zamowienie['id_klienta'] = ID_Klienta
+	zamowienie['id_zamowienia'] = str(ID_Zamowienia)
+	zamowienie['id_klienta'] = klient['id_klienta']
 	zamowienie['id_konferencji'] = konferencja['id_konferencji']
 	zamowienie['data_zl_zam'] = daty['data_zlozenia_zam']
 	zamowienie['termin_platnosci'] = daty['termin_zaplaty']
-	zamowienie['do_zaplaty'] = daty['procent_ceny'] * int(konferencja['cena'])
-	zamowienie['zaplacono'] = random.sample(set([0,zamowienie['do_zaplaty']/2, zamowienie['do_zaplaty']]),1)[0]
+	zamowienie['do_zaplaty'] = "{0:.2f}".format(daty['procent_ceny'] * int(konferencja['cena']))
+	do_z = int((daty['procent_ceny'] * int(konferencja['cena'])))
+	zamowienie['zaplacono'] = random.sample(set([0,0.5*do_z, do_z]),1)[0]
 	if zamowienie['zaplacono'] < zamowienie['do_zaplaty']: 
 		zamowienie['status_platnosci'] = '\"Niezaplacone\"'
 		zamowienie['status_rezerwacji'] = 0
@@ -331,14 +351,16 @@ def generuj_zamowienie(ID_Zamowienia, ID_ZamSzczegolowego, ID_Klienta, konferenc
 		zam_szcz['id_zamszczegolowego'] = str(id_zamszczegolowego)
 		zam_szcz['id_zamowienia'] = str(zamowienie['id_zamowienia'])
 		zam_szcz['id_dnia'] = str(day['id_dnia'])
-		zam_szcz['liczba_miejsc_konf'] = str(0)
+		if klient.has_key('pracownicy'): zam_szcz['liczba_miejsc_konf'] = str(len(klient['pracownicy']))
+		else: zam_szcz['liczba_miejsc_konf'] = str(1)
 		zam_szcz['zamowienia_warsztatow'] = []
 
 		for warsztat in day['warsztaty']:
 			zam_warszt = {}
 			zam_warszt['id_zamszczegolowego'] = str(id_zamszczegolowego)
 			zam_warszt['id_warsztatu'] = str(warsztat['id_warsztatu'])
-			zam_warszt['liczba_msc'] = str(0)
+			if klient.has_key('pracownicy'): zam_warszt['liczba_msc'] = len(klient['pracownicy'])
+			else: zam_warszt['liczba_msc'] = str(1)
 			zam_warszt['status_rezerwacji'] = zamowienie['status_rezerwacji']
 			zam_szcz['zamowienia_warsztatow'].append(zam_warszt)
 
@@ -405,9 +427,10 @@ def generuj_plik(filename):
 #print generuj_osobe()
 #print generuj_firme()
 if __name__ == "__main__":
+
 	generuj_plik('dane.sql')
 
-#print generuj_konferencja(1,2,1,1,1,1,1)
+	#print generuj_konferencja(1,2,1,1,1,1,1)
 #print generuj_daty_konf('1/1/2009', '3/1/2014',random.random())
 
 #print '\n'
