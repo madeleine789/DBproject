@@ -1,31 +1,14 @@
 CREATE DATABASE Konferencje
 GO
+
+USE Konferencje
 GO
-
-CREATE TABLE Prog (
-        ID_Progu INT PRIMARY KEY NOT NULL,
-        ProcentCeny SMALLINT NOT NULL CHECK(ProcentCeny > 0),
-        GornyProgCzasowy SMALLINT NOT NULL,
-        DolnyProgCzasowy SMALLINT NOT NULL
-)
-
-CREATE TABLE ProgiCenowe (
-        ID_Progu INT UNIQUE FOREIGN KEY REFERENCES Prog(ID_Progu) NOT NULL,
-        ID_Konferencji INT UNIQUE FOREIGN KEY REFERENCES Konferencja(ID_Konferencji) NOT NULL,
-        PRIMARY KEY(ID_Progu, ID_Konferencji)
-)
 
 CREATE TABLE ZnizkaStudencka (
         ProcentZnizki SMALLINT
 )
 
 INSERT INTO ZnizkaStudencka (ProcentZnizki) VALUES (50)
-GO
-INSERT INTO Prog (ID_Progu, ProcentCeny, GornyProgCzasowy, DolnyProgCzasowy) VALUES (1, 90, 3)
-GO
-INSERT INTO Prog (ID_Progu, ProcentCeny, GornyProgCzasowy, DolnyProgCzasowy) VALUES (2, 100, 2)
-GO
-INSERT INTO Prog (ID_Progu, ProcentCeny, GornyProgCzasowy, DolnyProgCzasowy) VALUES (3, 110, 1)
 GO
 
 CREATE TABLE StatusKonferencji (
@@ -191,6 +174,27 @@ CREATE TABLE UczestnikWarsztatu (
 
 )
 GO
+
+CREATE TABLE Prog (
+        ID_Progu INT PRIMARY KEY NOT NULL,
+        ProcentCeny SMALLINT NOT NULL CHECK(ProcentCeny > 0),
+        GornyProgCzasowy SMALLINT,
+        DolnyProgCzasowy SMALLINT NOT NULL
+)
+
+CREATE TABLE ProgiCenowe (
+        ID_Progu INT UNIQUE FOREIGN KEY REFERENCES Prog(ID_Progu) NOT NULL,
+        ID_Konferencji INT UNIQUE FOREIGN KEY REFERENCES Konferencja(ID_Konferencji) NOT NULL,
+        PRIMARY KEY(ID_Progu, ID_Konferencji)
+)
+
+INSERT INTO Prog (ID_Progu, ProcentCeny, GornyProgCzasowy, DolnyProgCzasowy) VALUES (1, 90, NULL, 2)
+GO
+INSERT INTO Prog (ID_Progu, ProcentCeny, GornyProgCzasowy, DolnyProgCzasowy) VALUES (2, 100, 2, 1)
+GO
+INSERT INTO Prog (ID_Progu, ProcentCeny, GornyProgCzasowy, DolnyProgCzasowy) VALUES (3, 110, 1, 0)
+GO
+
 ----------------------------------------------------------------------------------------------------------------
 
 CREATE PROCEDURE nowy_adres
@@ -287,7 +291,7 @@ CREATE PROCEDURE dodaj_klienta_firma(
 	@Adres NVARCHAR(60),
 	@Miasto NVARCHAR(15),
 	@KodPocztowy NVARCHAR(10),
-	@Kraj NVARCHAR(15)
+	@Kraj NVARCHAR(15))
 AS
 BEGIN
 
@@ -355,8 +359,8 @@ AS
 		ROLLBACK TRAN
 		
 	END CATCH
-END
 GO
+
 CREATE PROCEDURE dodaj_pracownika
 
 	@NIP INT,
@@ -393,7 +397,7 @@ BEGIN
 	begin catch
 		declare @error as varchar(127)
 		set @error = (Select ERROR_MESSAGE())
-		RAISERROR('Nie mo¿na dodac konferencji. %s', 16, 1, @error);
+		RAISERROR('Nie moï¿½na dodac konferencji. %s', 16, 1, @error);
 	end catch
 END
 GO
@@ -479,7 +483,7 @@ BEGIN
 	begin catch
 		declare @error as varchar(127)
 		set @error = (Select ERROR_MESSAGE())
-		RAISERROR('Nie mo¿na dodac dnia konferencji. %s', 16, 1, @error);
+		RAISERROR('Nie moï¿½na dodac dnia konferencji. %s', 16, 1, @error);
 	end catch
 END
 GO
