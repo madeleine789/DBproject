@@ -53,9 +53,9 @@ SELECT WAR.Cena PodstawowaCenaZaOsobe,
 	   DK.DzienKonferencji DataWarsztatu,
 	   WAR.LimitMiejscWarsztat - 
 		(SELECT SUM(ZW.LiczbaMiejsc)
-		FROM ZamowienieWarsztatu ZW
-		WHERE WAR.ID_Warsztatu=ZW.ID_Warsztatu
-		GROUP BY ZW.ID_Warsztatu) LiczbaWolnychMiejsc
+		 FROM ZamowienieWarsztatu ZW
+		 WHERE WAR.ID_Warsztatu=ZW.ID_Warsztatu
+		 GROUP BY ZW.ID_Warsztatu) LiczbaWolnychMiejsc
 FROM Warsztat WAR
 JOIN DzienKonferencji DK ON WAR.ID_DniaKonferencji=DK.ID_DniaKonferencji
 JOIN Konferencja KON ON KON.ID_Konferencji=DK.ID_Konferencji
@@ -70,8 +70,8 @@ GO
 ------------ Firmy ktore nie maja potwierdzonych danych uczestnikow dla zamowien przy uplywajacym czasie ----
 CREATE VIEW NiepotwierdzoneDane AS
 SELECT FI.NazwaFirmy,
-	   FI.Telefon,
-	   FI.Email
+       FI.Telefon,
+       FI.Email
 FROM Zamowienie ZAM
 JOIN Klient KLI ON KLI.ID_Klienta=ZAM.ID_Klienta
 JOIN ZamowienieSzczegolowe ZS ON ZS.ID_Zamowienia=ZAM.ID_Zamowienia
@@ -79,17 +79,17 @@ JOIN ZamowienieWarsztatu ZW ON ZW.ID_ZamSzczegolowego=ZS.ID_ZamSzczegolowego
 JOIN Firma FI ON FI.ID_Klienta=KLI.ID_Klienta AND KLI.CzyFirma = 1
 WHERE (ZAM.StatusRezerwacji = 0 OR ZW.StatusRezerwacji = 0) AND 
       (DATEDIFF(DAY,ZAM.DataZlozeniaZamowienia,GETDATE()) >= 7 AND 
-      DATEDIFF(DAY,ZAM.DataZlozeniaZamowienia,GETDATE()) <= 14)
+       DATEDIFF(DAY,ZAM.DataZlozeniaZamowienia,GETDATE()) <= 14)
 GO
 
 ---------- Klienci ktorzy wplacili nieprawidlowa kwote -------
 CREATE VIEW NieprawidlowaKwota AS
 SELECT ID, 
-	   Klient, 
-	   Firma, 
-	   Email, 
-	   Zaplacono, 
-	   DoZapltay
+       Klient, 
+       Firma, 
+       Email, 
+       Zaplacono, 
+       DoZapltay
 FROM
 (
 SELECT KLI.ID_Klienta ID, 
