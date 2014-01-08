@@ -384,7 +384,7 @@ def generuj_plik(filename):
         for item in generuj_tematy_warsztatow():
             f.write('EXEC dodaj_temat_warsztatu ' + item + '\n')
         
-        for konf in generuj_konferencje():
+        for konf in generuj_konferencje(100):
             
             f.write('EXEC dodaj_konferencje ' + konf['id_tematu_konf'] + ', ' + konf['data_rozp'] + ', ' + konf['data_zak'] + ', ' + konf['cena'] + ', ' + konf['status']  + '\n')
             
@@ -434,7 +434,7 @@ def generuj_plik(filename):
 #print generuj_firme()
 if __name__ == "__main__":
 
-	generuj_plik('daneee.sql')
+	generuj_plik('d.sql')
 
 #print generuj_konferencja(1,2,1,1,1,1,1)
 #print generuj_daty_konf('1/1/2009', '3/1/2014',random.random())
