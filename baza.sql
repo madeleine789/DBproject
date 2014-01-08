@@ -291,7 +291,7 @@ CREATE PROCEDURE dodaj_klienta_firma
 	@Adres NVARCHAR(60),
 	@Miasto NVARCHAR(15),
 	@KodPocztowy NVARCHAR(10),
-	@Kraj NVARCHAR(15))
+	@Kraj NVARCHAR(15)
 AS
 BEGIN
 
