@@ -42,7 +42,8 @@ SELECT KON.Cena PodstawowaCenaZaOsobe,
        TK.Opis OpisKonferencji
 FROM Konferencja KON 
 JOIN TematKonferencji TK ON TK.ID_TematuKonferencji=KON.ID_TematuKonferencji
-WHERE KON.StatusKonferencji LIKE 'W trakcie'
+JOIN StatusKonferencji SK ON SK.ID_StatusuKonferencji=KON.StatusKonferencji
+WHERE SK.StatusKonferencji LIKE 'W trakcie'
 GO
 
 ----------- Dostepne warsztaty dla klienta -------------
@@ -77,7 +78,7 @@ JOIN Klient KLI ON KLI.ID_Klienta=ZAM.ID_Klienta
 JOIN ZamowienieSzczegolowe ZS ON ZS.ID_Zamowienia=ZAM.ID_Zamowienia
 JOIN ZamowienieWarsztatu ZW ON ZW.ID_ZamSzczegolowego=ZS.ID_ZamSzczegolowego
 JOIN Firma FI ON FI.ID_Klienta=KLI.ID_Klienta AND KLI.CzyFirma = 1
-WHERE (ZAM.StatusRezerwacji = 0 OR ZW.StatusRezerwacji = 0) AND 
+WHERE (ZAM.StatusRezerwacji = 1 OR ZW.StatusRezerwacji = 1) AND 
       (DATEDIFF(DAY,ZAM.DataZlozeniaZamowienia,GETDATE()) >= 7 AND 
        DATEDIFF(DAY,ZAM.DataZlozeniaZamowienia,GETDATE()) <= 14)
 GO
@@ -135,7 +136,8 @@ SELECT YEAR(ZAM.DataZlozeniaZamowienia) Rok,
 	   END) Miesiac,
 	   SUM(ZAM.DoZapltay) Przychod
 FROM Zamowienie ZAM 
-WHERE ZAM.StatusPlatnosci LIKE 'Zaplacone'
+JOIN StatusPlatnosci SP ON SP.ID_StatusuPlatnosci=ZAM.StatusPlatnosci
+WHERE SP.StatusPlatnosci LIKE 'Zaplacone'
 GROUP BY YEAR(ZAM.DataZlozeniaZamowienia), MONTH(ZAM.DataZlozeniaZamowienia) 
 WITH ROLLUP
 GO
