@@ -1,8 +1,8 @@
 CREATE DATABASE Konferencje
 GO
-
 USE Konferencje
 GO
+
 
 CREATE TABLE ZnizkaStudencka (
         ProcentZnizki SMALLINT
@@ -281,7 +281,7 @@ BEGIN
 END
 GO
 GO
-CREATE PROCEDURE dodaj_klienta_firma(
+CREATE PROCEDURE dodaj_klienta_firma
 	-- parametry
 	@NIP varchar(20),
 	@NazwaFirmy nvarchar(45),
@@ -324,16 +324,12 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE dodaj_osobe (
+CREATE PROCEDURE dodaj_osobe 
 	@Imie NVARCHAR(20),
 	@Nazwisko NVARCHAR(20),
 	@NrAlbumu NVARCHAR(6) = null,
 	@Telefon NVARCHAR(25) = null,
-	@Email NVARCHAR(45) = null,
-	@Adres NVARCHAR(60),
-	@Miasto NVARCHAR(15),
-	@KodPocztowy NVARCHAR(10),
-	@Kraj NVARCHAR(15))
+	@Email NVARCHAR(45) = null
 AS
 	SET NOCOUNT ON;
 	DECLARE @ID_DanychAdresowych AS INT;
@@ -341,12 +337,8 @@ AS
 	
 		SET NOCOUNT ON;
 		BEGIN TRAN
-
-		EXECUTE nowy_adres @Adres,@Miasto,@KodPocztowy,@Kraj;
-		SET @ID_DanychAdresowych = @@IDENTITY;
-		
 		INSERT INTO Osoba
-		VALUES(NULL,@ID_DanychAdresowych, @Imie, @Nazwisko, @NrAlbumu, @Telefon, @Email);
+		VALUES(NULL,NULL, @Imie, @Nazwisko, @NrAlbumu, @Telefon, @Email);
 		COMMIT TRAN
 		
 	END TRY
@@ -384,7 +376,7 @@ CREATE PROCEDURE dodaj_konferencje
 	@DataRozpoczecia DATE,
 	@DataZakonczenia DATE,
 	@CenaKonferencji MONEY,
-	@StatusKonferencji VARCHAR(10)
+	@StatusKonferencji SMALLINT
 	
 AS
 BEGIN
@@ -397,7 +389,7 @@ BEGIN
 	begin catch
 		declare @error as varchar(127)
 		set @error = (Select ERROR_MESSAGE())
-		RAISERROR('Nie mo�na dodac konferencji. %s', 16, 1, @error);
+		RAISERROR('Nie mozna dodac konferencji. %s', 16, 1, @error);
 	end catch
 END
 GO
@@ -424,10 +416,12 @@ END
 GO
 GO
 CREATE PROCEDURE dodaj_warsztat
+
 	-- parametry
 	@ID_TematuWarsztatu INT,
-	@ID_DniaKonferencji DATE,
+	@ID_DniaKonferencji INT,
 	@CenaWarsztatu MONEY,
+	@LimitMiejscWarsztat SMALLINT,
 	@GodzRozpoczecia TIME,
 	@GodzinaZakonczenia TIME
 	
@@ -437,7 +431,7 @@ BEGIN
 	SET NOCOUNT ON;
 	begin try
 		INSERT INTO Warsztat
-		VALUES(@ID_TematuWarsztatu, @ID_DniaKonferencji, @CenaWarsztatu, @GodzRozpoczecia, @GodzinaZakonczenia);
+		VALUES(@ID_TematuWarsztatu, @ID_DniaKonferencji, @CenaWarsztatu,@LimitMiejscWarsztat, @GodzRozpoczecia, @GodzinaZakonczenia);
 	end try
 	begin catch
 		declare @error as varchar(127)
@@ -483,7 +477,7 @@ BEGIN
 	begin catch
 		declare @error as varchar(127)
 		set @error = (Select ERROR_MESSAGE())
-		RAISERROR('Nie mo�na dodac dnia konferencji. %s', 16, 1, @error);
+		RAISERROR('Nie mozna dodac dnia konferencji. %s', 16, 1, @error);
 	end catch
 END
 GO
