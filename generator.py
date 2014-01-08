@@ -41,7 +41,7 @@ def generuj_adres():
 
 def generuj_firme():
 
-	NIP = str(randint(1000000000,9999999999)) + str(randint(1000000000,9999999999))
+	NIP = str(randint(1000000000,9999999999)) + str(randint(10000,99999))
 
 	nazwa = "\"" + firmy[randint(0,len(firmy)-1)] + "\""
 
@@ -178,7 +178,7 @@ def generuj_konferencja(id_konferencji,id_warsztatu,id_dnia,id_osoby,id_klienta,
 
 
 	for i in xrange(0,int(limit_miejsc_k/2)):
-	#for i in xrange(50):
+	#for i in xrange(5):
 		klient = {}
 		dane = generuj_osobe()
 		
@@ -197,7 +197,7 @@ def generuj_konferencja(id_konferencji,id_warsztatu,id_dnia,id_osoby,id_klienta,
 		id_os += 1
 
 	for i in xrange(0,int(limit_miejsc_k/8)):
-	#for i in xrange(0,15):
+	#for i in xrange(0,5):
 		klient = {}
 		dane = generuj_firme()
 		
@@ -248,7 +248,7 @@ def generuj_konferencje(l_konferencji = 10):
 
 	konferencje = []
 	for i in xrange(0,l_konferencji):
-		id_konferencji = i
+		id_konferencji = 1
 		konferencja = generuj_konferencja(id_konferencji, id_warsztatu, id_dnia, id_osoby, id_klienta, id_zamowienia, id_zamszczegolowego)
 		id_dnia = konferencja['id_dnia']
 		konferencje.append(konferencja)
@@ -384,7 +384,7 @@ def generuj_plik(filename):
         for item in generuj_tematy_warsztatow():
             f.write('EXEC dodaj_temat_warsztatu ' + item + '\n')
         
-        for konf in generuj_konferencje(1):
+        for konf in generuj_konferencje():
             
             f.write('EXEC dodaj_konferencje ' + konf['id_tematu_konf'] + ', ' + konf['data_rozp'] + ', ' + konf['data_zak'] + ', ' + konf['cena'] + ', ' + konf['status']  + '\n')
             
@@ -434,7 +434,7 @@ def generuj_plik(filename):
 #print generuj_firme()
 if __name__ == "__main__":
 
-	generuj_plik('dane4.sql')
+	generuj_plik('daneee.sql')
 
 #print generuj_konferencja(1,2,1,1,1,1,1)
 #print generuj_daty_konf('1/1/2009', '3/1/2014',random.random())
