@@ -426,7 +426,7 @@ GO
 CREATE PROCEDURE dodaj_warsztat
 	-- parametry
 	@ID_TematuWarsztatu INT,
-	@ID_DniaKonferencji DATE,
+	@ID_DniaKonferencji INT,
 	@CenaWarsztatu MONEY,
 	@GodzRozpoczecia TIME,
 	@GodzinaZakonczenia TIME
