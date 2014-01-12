@@ -20,7 +20,7 @@ for i in miasta:
 
 tematy_konferencji = [line.strip() for line in open('tematy_k.txt')]
 tematy_warsztatow = [line.strip() for line in open('tematy_w.txt')]
-
+nips = []
 
 def generuj_adres():
 	
@@ -41,7 +41,14 @@ def generuj_adres():
 
 def generuj_firme():
 
-	NIP = str(randint(1000000000,9999999999)) + str(randint(10000,99999))
+
+	NIP = str(randint(10000,99999))
+	while NIP in nips:
+		NIP = str(randint(10000,99999))
+	else:
+		nips.append(NIP) 
+
+
 
 	nazwa = "\"" + firmy[randint(0,len(firmy)-1)] + "\""
 
@@ -128,8 +135,25 @@ def generuj_daty_konf(start,end,p):
 
     return daty_konf(start, end, '%m/%d/%Y', p)
 
+def generuj_liste_klientow(N=500,prywatni=True):
+	klienci_lista = []
+	for i in xrange(N):
+		klient = {}
+		if prywatni:
+			dane = generuj_osobe()
+		else: 
+			dane = generuj_firme()
+		for key, val in dane.iteritems():
+			klient[key] = dane[key]
+		klient['adres'] = generuj_adres()
+		klienci_lista.append(klient)
 
-def generuj_konferencja(id_konferencji,id_warsztatu,id_dnia,id_osoby,id_klienta,id_zamowienia,id_zamszczegolowego):
+	return klienci_lista
+
+
+
+
+def generuj_konferencja(lista_klientow_prywatnych,lista_klientow_firmy,id_konferencji,id_warsztatu,id_dnia,id_osoby,id_klienta,id_zamowienia,id_zamszczegolowego,id_zamwarsztatu):
 
 	id_uczestnika = 1
 	konferencja = {}
@@ -180,37 +204,40 @@ def generuj_konferencja(id_konferencji,id_warsztatu,id_dnia,id_osoby,id_klienta,
 	for i in xrange(0,int(limit_miejsc_k/2)):
 	#for i in xrange(5):
 		klient = {}
-		dane = generuj_osobe()
-		
-		for key, val in dane.iteritems():
-			klient[key] = dane[key]
-		klient['adres'] = generuj_adres()
+		num = randint(0,len(lista_klientow_prywatnych)-1)
+		k = lista_klientow_prywatnych[num]
+
+		for key in k.keys():
+			klient[key] = k[key]
 		klient['id_klienta'] = id_kl
 		klient['id_osoby']  = id_os
 		klient['id_uczestnika'] = id_uczestnika
-		klient['zamowienie'] = generuj_zamowienie(id_zamowienia, id_zamszczegolowego, klient, konferencja, konferencja['lista_dni'])
+		klient['zamowienie'] = generuj_zamowienie(id_zamowienia, id_zamszczegolowego,id_zamwarsztatu,klient, konferencja, konferencja['lista_dni'])
 		klienci.append(klient)
+
+
+
 		id_uczestnika += 1
 		id_zamowienia += 1
 		id_zamszczegolowego += 1
+		id_zamwarsztatu += 1
 		id_kl += 1
 		id_os += 1
 
 	for i in xrange(0,int(limit_miejsc_k/8)):
 	#for i in xrange(0,5):
 		klient = {}
-		dane = generuj_firme()
-		
-		for key, val in dane.iteritems():
-			klient[key] = dane[key]
-		klient['adres'] = generuj_adres()		
+		num = randint(0,len(lista_klientow_firmy)-1)
+		k = lista_klientow_firmy[num]	
+		for key in k.keys():
+			klient[key] = k[key]	
 		klient['id_klienta'] = id_kl
 		id_kl += 1 
 		pracownicy = []
 		for i in xrange(0,random.randint(1,4)):
 			pracownik = {}
 			dane = generuj_osobe()
-			for key, val in dane.iteritems():
+			for key in dane.keys():
 				pracownik[key] = dane[key]
 			pracownik['id_osoby'] = str(id_os)
 			pracownik['NIP'] = klient['NIP']
@@ -219,10 +246,11 @@ def generuj_konferencja(id_konferencji,id_warsztatu,id_dnia,id_osoby,id_klienta,
 			id_os += 1
 			pracownicy.append(pracownik)
 		klient['pracownicy'] = pracownicy
-		klient['zamowienie'] = generuj_zamowienie(id_zamowienia, id_zamszczegolowego, klient, konferencja, konferencja['lista_dni'])
+		klient['zamowienie'] = generuj_zamowienie(id_zamowienia, id_zamszczegolowego, id_zamwarsztatu, klient, konferencja, konferencja['lista_dni'])
 		klienci.append(klient)
 		id_zamowienia += 1
 		id_zamszczegolowego += 1
+		id_zamwarsztatu += 1
 
 	
 	konferencja['id_dnia'] = id_dnia
@@ -245,11 +273,15 @@ def generuj_konferencje(l_konferencji = 10):
 	id_zamszczegolowego = 1
 	id_zamowienia = 1
 	id_warsztatu = 1
+	id_zamwarsztatu = 1
+
+	lista_klientow_prywatnych = generuj_liste_klientow(200)
+	lista_klientow_firmy = generuj_liste_klientow(100, prywatni = False)
 
 	konferencje = []
 	for i in xrange(0,l_konferencji):
 		id_konferencji = 1
-		konferencja = generuj_konferencja(id_konferencji, id_warsztatu, id_dnia, id_osoby, id_klienta, id_zamowienia, id_zamszczegolowego)
+		konferencja = generuj_konferencja(lista_klientow_prywatnych,lista_klientow_firmy,id_konferencji, id_warsztatu, id_dnia, id_osoby, id_klienta, id_zamowienia, id_zamszczegolowego, id_zamwarsztatu)
 		id_dnia = konferencja['id_dnia']
 		konferencje.append(konferencja)
 	
@@ -283,6 +315,7 @@ def generuj_warsztat(id_dnia, id_warsztatu):
 	warsztat['godz_rozp'] = godziny['godz_rozp']
 	warsztat['godz_zak'] = godziny['godz_zak']
 	warsztat['id_warsztatu'] = id_warsztatu
+	warsztat['uczestnicy'] = []
 
 	if godziny['czas_trw'] == 90 : warsztat['cena'] = str(random.randint(100,200))
 	elif godziny['czas_trw'] == 120 : warsztat['cena'] = str(random.randint(200,300))
@@ -325,11 +358,12 @@ def generuj_daty_zamowien(start, format):
     return zam_kalendarz
 
 
-def generuj_zamowienie(ID_Zamowienia,ID_ZamSzczegolowego,klient,konferencja,lista_dni):
+def generuj_zamowienie(ID_Zamowienia,ID_ZamSzczegolowego,ID_ZamWarsztatu,klient,konferencja,lista_dni):
 	
 	daty = generuj_daty_zamowien(konferencja['data_rozp'].strip("\""), "%m/%d/%Y")
 	zamowienie = {}
 	id_zamszczegolowego =  ID_ZamSzczegolowego
+	id_zamwarsztatu = ID_ZamWarsztatu
 	zamowienie['id_zamowienia'] = str(ID_Zamowienia)
 	zamowienie['id_klienta'] = klient['id_klienta']
 	zamowienie['id_konferencji'] = konferencja['id_konferencji']
@@ -337,7 +371,9 @@ def generuj_zamowienie(ID_Zamowienia,ID_ZamSzczegolowego,klient,konferencja,list
 	zamowienie['termin_platnosci'] = daty['termin_zaplaty']
 	zamowienie['do_zaplaty'] = "{0:.2f}".format(daty['procent_ceny'] * int(konferencja['cena']))
 	do_z = int((daty['procent_ceny'] * int(konferencja['cena'])))
-	zamowienie['zaplacono'] = random.sample(set([0,0.5*do_z, do_z]),1)[0]
+	if klient.has_key('pracownicy'): 
+		do_z = int(do_z * len(klient['pracownicy']))
+	zamowienie['zaplacono'] = random.sample(set([0, int(0.5 * do_z), int(do_z)]),1)[0]
 	if zamowienie['zaplacono'] < zamowienie['do_zaplaty']: 
 		zamowienie['status_platnosci'] = '1'
 		zamowienie['status_rezerwacji'] = '0'
@@ -345,6 +381,8 @@ def generuj_zamowienie(ID_Zamowienia,ID_ZamSzczegolowego,klient,konferencja,list
 		zamowienie['status_platnosci'] = '2'
 		zamowienie['status_rezerwacji'] = '1'
 	zamowienie['status_rejestracji'] = '2'
+
+
 
 	zamowienie['zamowienia_szczegolowe'] = []
 	for day in lista_dni:
@@ -357,18 +395,25 @@ def generuj_zamowienie(ID_Zamowienia,ID_ZamSzczegolowego,klient,konferencja,list
 		zam_szcz['zamowienia_warsztatow'] = []
 
 		for warsztat in day['warsztaty']:
+			id_uczwarsztatu = 1
 			zam_warszt = {}
 			zam_warszt['id_zamszczegolowego'] = str(id_zamszczegolowego)
+			zam_warszt['id_zamwarsztatu'] = str(id_zamwarsztatu)
 			zam_warszt['id_warsztatu'] = str(warsztat['id_warsztatu'])
-			if klient.has_key('pracownicy'): zam_warszt['liczba_msc'] = len(klient['pracownicy'])
+			if klient.has_key('pracownicy'): 
+				zam_warszt['liczba_msc'] = len(klient['pracownicy'])
+				#for osoba in klient['pracownicy']:
+					#osoba['id_ucz']
 			else: zam_warszt['liczba_msc'] = str(1)
 			zam_warszt['status_rezerwacji'] = zamowienie['status_rezerwacji']
 			zam_szcz['zamowienia_warsztatow'].append(zam_warszt)
+			id_zamwarsztatu +=1
 
 		id_zamszczegolowego += 1
 		zamowienie['zamowienia_szczegolowe'].append(zam_szcz)
 
 	zamowienie['id_zamszczegolowego'] = id_zamszczegolowego
+	zamowienie['id_zamwarsztatu'] = id_zamwarsztatu
 
 	return zamowienie
 
@@ -376,66 +421,62 @@ def generuj_zamowienie(ID_Zamowienia,ID_ZamSzczegolowego,klient,konferencja,list
 
 
 
-def generuj_plik(filename):
+def generuj_plik(filename, l_konf = 50):
     with open(filename, 'w') as f:
 
-       	for item in generuj_tematy_konferencji():
+        for item in generuj_tematy_konferencji():
             f.write('EXEC dodaj_temat_konferencji ' + item + '\n')
         for item in generuj_tematy_warsztatow():
             f.write('EXEC dodaj_temat_warsztatu ' + item + '\n')
         
-        for konf in generuj_konferencje(100):
+        for konf in generuj_konferencje(l_konf):
             
-            f.write('EXEC dodaj_konferencje ' + konf['id_tematu_konf'] + ', ' + konf['data_rozp'] + ', ' + konf['data_zak'] + ', ' + konf['cena'] + ', ' + konf['status']  + '\n')
+            f.write('EXEC dodaj_konferencje ' + konf['id_tematu_konf'] + ', ' + konf['data_rozp'] + ', ' + konf['data_zak'] + ', ' + konf['cena'] + ', ' + konf['status'] + '\n')
             
             l_dni = konf['lista_dni']
             for day in l_dni:
-                f.write('EXEC dodaj_dzien_konferencji ' + day['id_konferencji'] + ', ' + day['dzien_konferencji'] + ', ' + day['limit_miejsc'] + '\n') 
+                f.write('EXEC dodaj_dzien_konferencji ' + day['id_konferencji'] + ', ' + day['dzien_konferencji'] + ', ' + day['limit_miejsc'] + '\n')
                 l_warsztatow = day['warsztaty']
                 for warszt in l_warsztatow:
                     f.write('EXEC dodaj_warsztat ' + warszt['id_tematu'] + ', ' + warszt['id_dnia'] + ', ' + warszt['cena'] + ', ' + warszt['limit_miejsc'] + ', ' + warszt['godz_rozp'] + ', ' + warszt['godz_zak'] + '\n')
             l_klientow = konf['klienci']
             
             for kl in l_klientow:
-            	if 'pracownicy' in kl:
+                if 'pracownicy' in kl:
                     f.write('EXEC dodaj_klienta_firma ' + kl['NIP'] + ', ' + kl['nazwa'] + ', ' + kl['telefon'] + ', ' + kl['fax'] + ', ' + kl['email'] + ', ' + kl['adres'] + '\n')
                     l_pracownikow = kl['pracownicy']
                     for prac in l_pracownikow:
                         f.write('EXEC dodaj_osobe ' + prac['imie'] + ', ' + prac['nazwisko'] + ', ' + prac['nr_albumu'] + ', ' + prac['telefon'] + ', ' + prac['email'] + '\n')
-                        f.write('EXEC dodaj_pracownika ' + prac['NIP'] + ', ' + prac['id_osoby']+ '\n') 
-                        for zam_s in zam['zamowienia_szczegolowe']:
-                			f.write('EXEC dodaj_uczestnika_konferencji ' + prac['id_osoby'] + ', ' + zam_s['id_zamszczegolowego'] + '\n')
-                			for zam_w in zam_s['zamowienia_warsztatow']:
-                				f.write('EXEC dodaj_uczestnika_warsztatu ' + prac['id_uczestnika'] + ', ' + str(zam_w['id_warsztatu']) + '\n')
+                        f.write('EXEC dodaj_pracownika ' + prac['NIP'] + ', ' + prac['id_osoby']+ '\n')
+                        """for zam_s in zam['zamowienia_szczegolowe']:
+                                        f.write('EXEC dodaj_uczestnika_konferencji ' + prac['id_osoby'] + ', ' + zam_s['id_zamszczegolowego'] + '\n')
+                                        for zam_w in zam_s['zamowienia_warsztatow']:
+                                                f.write('EXEC dodaj_uczestnika_warsztatu ' + prac['id_uczestnika'] + ', ' + str(zam_w['id_warsztatu']) + '\n')"""
         
                 else:
-                    f.write('EXEC dodaj_klienta_osoba ' + kl['imie'] + ', ' + kl['nazwisko'] + ', ' + kl['nr_albumu'] + ', ' + kl['telefon'] + ', ' + kl['email'] + ', ' + kl['adres'] + '\n')    
+                    f.write('EXEC dodaj_klienta_osoba ' + kl['imie'] + ', ' + kl['nazwisko'] + ', ' + kl['nr_albumu'] + ', ' + kl['telefon'] + ', ' + kl['email'] + ', ' + kl['adres'] + '\n')
 
-            	zam = kl['zamowienie']
+                zam = kl['zamowienie']
                 f.write('EXEC dodaj_zamowienie ' + str(zam['id_klienta']) + ', ' + str(zam['id_konferencji']) + ', ' + "\""+zam['data_zl_zam']+ "\""+ ', ' + zam['status_rejestracji'] + ', ' + str(zam['status_rezerwacji']) + ', ' +str(zam['do_zaplaty']) + ', ' + str(zam['zaplacono']) + ', ' + "\"" + zam['termin_platnosci'] + "\""+ ', ' + str(zam['status_platnosci']) + '\n' )
                 for zam_s in zam['zamowienia_szczegolowe']:
-                		f.write('EXEC dodaj_zamowienie_szcz ' + zam_s['id_zamowienia'] + ', ' + zam_s['id_dnia'] + ', ' + zam_s['liczba_miejsc_konf'] + '\n')
-                		if 'imie' in kl:
-                			f.write('EXEC dodaj_uczestnika_konferencji ' + str(kl['id_osoby']) + ', ' + str(zam_s['id_zamszczegolowego']) + '\n')
-                		for zam_w in zam_s['zamowienia_warsztatow']:
-                			f.write('EXEC dodaj_zamowienie_warsztatu ' + str(zam_w['id_zamszczegolowego']) + ', ' + str(zam_w['id_warsztatu']) + ', ' + str(zam_w['liczba_msc']) + ', ' + str(zam_w['status_rezerwacji']) + '\n')
-                			if 'imie' in kl:
-                				f.write('EXEC dodaj_uczestnika_warsztatu ' + str(kl['id_uczestnika']) + ', ' + str(zam_w['id_warsztatu']) + '\n')
+                    f.write('EXEC dodaj_zamowienie_szcz ' + zam_s['id_zamowienia'] + ', ' + zam_s['id_dnia'] + ', ' + zam_s['liczba_miejsc_konf'] + '\n')
+                    if 'imie' in kl:
+                        f.write('EXEC dodaj_uczestnika_konferencji ' + str(kl['id_osoby']) + ', ' + str(zam_s['id_zamszczegolowego']) + '\n')
+                    else:
+                    	for prac in kl['pracownicy']:
+                    	    f.write('EXEC dodaj_uczestnika_konferencji ' + prac['id_osoby'] + ', ' + zam_s['id_zamszczegolowego'] + '\n')
+                    for zam_w in zam_s['zamowienia_warsztatow']:
+                        f.write('EXEC dodaj_zamowienie_warsztatu ' + str(zam_w['id_zamszczegolowego']) + ', ' + str(zam_w['id_warsztatu']) + ', ' + str(zam_w['liczba_msc']) + ', ' + str(zam_w['status_rezerwacji']) + '\n')
+                        """if 'imie' in kl:
+                            f.write('EXEC dodaj_uczestnika_warsztatu ' + str(kl['id_uczestnika']) + ', ' + str(zam_w['id_warsztatu']) + '\n')"""
                 
-       			    
-
-       		
-       	
-
-
-
 
 #print generuj_osobe()
 #print generuj_firme()
 if __name__ == "__main__":
 
-	generuj_plik('d.sql')
 
+	print generuj_plik('trololo.sql',3)
 #print generuj_konferencja(1,2,1,1,1,1,1)
 #print generuj_daty_konf('1/1/2009', '3/1/2014',random.random())
 

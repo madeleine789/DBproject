@@ -80,7 +80,7 @@ CREATE TABLE Osoba (
 )
 		
 CREATE TABLE Firma (
-	NIP BIGINT PRIMARY KEY NOT NULL,
+	NIP INT PRIMARY KEY NOT NULL,
 	ID_Klienta INT UNIQUE FOREIGN KEY REFERENCES Klient(ID_Klienta) NOT NULL,
 	ID_DanychAdresowych INT UNIQUE FOREIGN KEY REFERENCES DaneAdresowe(ID_DanychAdresowych) NOT NULL,
 	NazwaFirmy NVARCHAR(40) NOT NULL,
@@ -91,7 +91,7 @@ CREATE TABLE Firma (
 )
 
 CREATE TABLE Pracownik (
-	NIP BIGINT FOREIGN KEY REFERENCES Firma(NIP) NOT NULL,
+	NIP INT FOREIGN KEY REFERENCES Firma(NIP) NOT NULL,
 	ID_Osoby INT UNIQUE FOREIGN KEY REFERENCES Osoba(ID_Osoby) NOT NULL,
 	PRIMARY KEY(ID_Osoby, NIP)
 )
@@ -283,7 +283,7 @@ GO
 GO
 CREATE PROCEDURE dodaj_klienta_firma
 	-- parametry
-	@NIP BIGINT,
+	@NIP INT,
 	@NazwaFirmy nvarchar(45),
 	@Telefon NVARCHAR(25) = NULL,
 	@Fax NVARCHAR(24) = NULL,
@@ -300,7 +300,7 @@ BEGIN
 	DECLARE @ID_Klienta AS INT;
 	
 	BEGIN TRY
-
+		BEGIN TRAN
 		EXECUTE nowy_adres @Adres,@Miasto,@KodPocztowy,@Kraj;
 		SET @ID_DanychAdresowych = @@IDENTITY;
 		 
@@ -310,14 +310,17 @@ BEGIN
 		
 		INSERT INTO Firma
 		VALUES(@NIP,@ID_Klienta,@ID_DanychAdresowych, @NazwaFirmy,@Telefon,@Fax,@Email);
-	
+		COMMIT TRAN
+		
 	END TRY
 	
 	BEGIN CATCH
 	
 		DECLARE @error AS VARCHAR(127)
 		SET @error = (SELECT ERROR_MESSAGE() AS error_message)
-		RAISERROR('Nie mozna dodac firmy, blad danych. %s', 16, 1,@error);
+		RAISERROR('Nie mozna dodac firmy, blad danych. %s', 16, 1,@error)
+		ROLLBACK TRAN;
+		
 		
 	END CATCH
 	
@@ -355,7 +358,7 @@ GO
 
 CREATE PROCEDURE dodaj_pracownika
 
-	@NIP BIGINT,
+	@NIP INT,
 	@ID_Osoby INT
 	
 AS
