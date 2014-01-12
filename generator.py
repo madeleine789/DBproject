@@ -164,14 +164,8 @@ def generuj_konferencja(lista_klientow_prywatnych,lista_klientow_firmy,id_konfer
 	lista_dni = konf['lista_dni']
 	liczba_dni = konf['liczba_dni']
 	status = konf['status']
-	cena = 300
-
-	if liczba_dni == 1:
-		cena = random.randint(300,700)	
-	elif liczba_dni == 2:
-		cena = random.randint(600,1200)
-	elif liczba_dni == 3:
-		cena = random.randint(900,1800)
+	cena = random.randint(300,700)	
+	
 
 	dni_konf = []
 	limit_miejsc_k = 0
