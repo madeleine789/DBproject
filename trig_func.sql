@@ -340,7 +340,6 @@ AFTER INSERT
 AS BEGIN
 	DECLARE @id_zamowienia AS INT
 	DECLARE @cena_za_osobe AS MONEY
-	DECLARE @prog AS SMALLINT
 	DECLARE @znizka AS SMALLINT
 	DECLARE @ilosc_osob AS INT
 	DECLARE @dotychczasowa_oplata AS MONEY
@@ -356,7 +355,6 @@ AS BEGIN
 						  WHERE ZW.ID_ZamowieniaWarsztatu = (SELECT ID_ZamowieniaWarsztatu FROM inserted)
 						  )
 						  
-	SET @prog = jaki_prog(@id_zamowienia)	
 	IF(czy_student(@id_zamowienia)) SET @znizka = (SELECT ZS.ProcentZnizki FROM ZnizkaStudencka ZS)
 	ELSE SET @znizka = 100
 	
@@ -365,7 +363,7 @@ AS BEGIN
 	SET @dotychczasowa_oplata = (SELECT DoZapltay FROM Zamowienie ZAM WHERE ZAM.ID_Zamowienia=@id_zamowienia)
 	
 	UPDATE Zamowienie
-	SET DoZapltay = @dotychczasowa_oplata + (@znizka/100)*(@prog/100)*(@ilosc_osob*@cena_za_osobe)
+	SET DoZapltay = @dotychczasowa_oplata + (@znizka/100)*(@ilosc_osob*@cena_za_osobe)
 	WHERE ID_Zamowienia=@id_zamowienia
 				
 END
