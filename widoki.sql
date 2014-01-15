@@ -93,7 +93,7 @@ SELECT ID,
        Firma, 
        Email, 
        Zaplacono, 
-       DoZapltay
+       DoZaplaty
 FROM
 (
 SELECT KLI.ID_Klienta ID, 
