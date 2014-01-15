@@ -52,20 +52,23 @@ SELECT WAR.Cena PodstawowaCenaZaOsobe,
 	   TW.Opis TematWarsztatu,
 	   TK.Opis ,
 	   DK.DzienKonferencji DataWarsztatu,
-	   WAR.LimitMiejscWarsztat - 
-		(SELECT SUM(ZW.LiczbaMiejsc)
+	   WAR.LimitMiejscWarsztat - ISNULL(
+		((SELECT SUM(ZW.LiczbaMiejsc)
 		 FROM ZamowienieWarsztatu ZW
 		 WHERE WAR.ID_Warsztatu=ZW.ID_Warsztatu
-		 GROUP BY ZW.ID_Warsztatu) LiczbaWolnychMiejsc
+		 GROUP BY ZW.ID_Warsztatu)),0) LiczbaWolnychMiejsc
 FROM Warsztat WAR
 JOIN DzienKonferencji DK ON WAR.ID_DniaKonferencji=DK.ID_DniaKonferencji
 JOIN Konferencja KON ON KON.ID_Konferencji=DK.ID_Konferencji
 JOIN TematWarsztatu TW ON TW.ID_TematuWarsztatu=WAR.ID_TematuWarsztatu
 JOIN TematKonferencji TK ON TK.ID_TematuKonferencji=KON.ID_TematuKonferencji
-WHERE WAR.LimitMiejscWarsztat > (SELECT SUM(ZW.LiczbaMiejsc)
-				 FROM ZamowienieWarsztatu ZW
-				 WHERE WAR.ID_Warsztatu=ZW.ID_Warsztatu
-				 GROUP BY ZW.ID_Warsztatu)
+WHERE GETDATE() < DK.DzienKonferencji
+AND  WAR.LimitMiejscWarsztat - ISNULL(
+		((SELECT SUM(ZW.LiczbaMiejsc)
+		 FROM ZamowienieWarsztatu ZW
+		 WHERE WAR.ID_Warsztatu=ZW.ID_Warsztatu
+		 GROUP BY ZW.ID_Warsztatu)),0) > 0
+GO							 
 GO							 
 
 ------------ Firmy ktore nie maja potwierdzonych danych uczestnikow dla zamowien przy uplywajacym czasie ----
