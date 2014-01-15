@@ -42,14 +42,11 @@ def generuj_adres():
 
 def generuj_firme():
 
-
 	NIP = str(randint(10000,99999))
 	while NIP in nips:
 		NIP = str(randint(10000,99999))
 	else:
 		nips.append(NIP) 
-
-
 
 	nazwa = "\"" + firmy[randint(0,len(firmy)-1)] + "\""
 
@@ -197,7 +194,6 @@ def generuj_konferencja(lista_klientow_prywatnych,lista_klientow_firmy,id_konfer
 
 
 	for i in xrange(0,int(limit_miejsc_k/2)):
-	#for i in xrange(5):
 		klient = {}
 		num = randint(0,len(lista_klientow_prywatnych)-1)
 		k = lista_klientow_prywatnych[num]
@@ -220,7 +216,6 @@ def generuj_konferencja(lista_klientow_prywatnych,lista_klientow_firmy,id_konfer
 		id_os += 1
 
 	for i in xrange(0,int(limit_miejsc_k/8)):
-	#for i in xrange(0,5):
 		klient = {}
 		num = randint(0,len(lista_klientow_firmy)-1)
 		k = lista_klientow_firmy[num]	
@@ -254,8 +249,6 @@ def generuj_konferencja(lista_klientow_prywatnych,lista_klientow_firmy,id_konfer
 	konferencja['id_zamowienia'] = id_zamowienia
 	konferencja['id_zamszczegolowego'] = id_zamszczegolowego
 	konferencja['klienci'] = klienci
-
-	print limit_miejsc_k
 
 	return konferencja
 
@@ -397,8 +390,6 @@ def generuj_zamowienie(ID_Zamowienia,ID_ZamSzczegolowego,ID_ZamWarsztatu,klient,
 			zam_warszt['id_warsztatu'] = str(warsztat['id_warsztatu'])
 			if klient.has_key('pracownicy'): 
 				zam_warszt['liczba_msc'] = len(klient['pracownicy'])
-				#for osoba in klient['pracownicy']:
-					#osoba['id_ucz']
 			else: zam_warszt['liczba_msc'] = str(1)
 			zam_warszt['status_rezerwacji'] = zamowienie['status_rezerwacji']
 			zam_szcz['zamowienia_warsztatow'].append(zam_warszt)
@@ -411,9 +402,6 @@ def generuj_zamowienie(ID_Zamowienia,ID_ZamSzczegolowego,ID_ZamWarsztatu,klient,
 	zamowienie['id_zamwarsztatu'] = id_zamwarsztatu
 
 	return zamowienie
-
-
-
 
 
 def generuj_plik(filename, l_konf = 50):
@@ -443,11 +431,7 @@ def generuj_plik(filename, l_konf = 50):
                     for prac in l_pracownikow:
                         f.write('EXEC dodaj_osobe ' + prac['imie'] + ', ' + prac['nazwisko'] + ', ' + prac['nr_albumu'] + ', ' + prac['telefon'] + ', ' + prac['email'] + '\n')
                         f.write('EXEC dodaj_pracownika ' + prac['NIP'] + ', ' + prac['id_osoby']+ '\n')
-                        """for zam_s in zam['zamowienia_szczegolowe']:
-                                        f.write('EXEC dodaj_uczestnika_konferencji ' + prac['id_osoby'] + ', ' + zam_s['id_zamszczegolowego'] + '\n')
-                                        for zam_w in zam_s['zamowienia_warsztatow']:
-                                                f.write('EXEC dodaj_uczestnika_warsztatu ' + prac['id_uczestnika'] + ', ' + str(zam_w['id_warsztatu']) + '\n')"""
-        
+                        
                 else:
                     f.write('EXEC dodaj_klienta_osoba ' + kl['imie'] + ', ' + kl['nazwisko'] + ', ' + kl['nr_albumu'] + ', ' + kl['telefon'] + ', ' + kl['email'] + ', ' + kl['adres'] + '\n')
 
@@ -462,8 +446,7 @@ def generuj_plik(filename, l_konf = 50):
                     	    f.write('EXEC dodaj_uczestnika_konferencji ' + prac['id_osoby'] + ', ' + zam_s['id_zamszczegolowego'] + '\n')
                     for zam_w in zam_s['zamowienia_warsztatow']:
                         f.write('EXEC dodaj_zamowienie_warsztatu ' + str(zam_w['id_zamszczegolowego']) + ', ' + str(zam_w['id_warsztatu']) + ', ' + str(zam_w['liczba_msc']) + ', ' + str(zam_w['status_rezerwacji']) + '\n')
-                        """if 'imie' in kl:
-                            f.write('EXEC dodaj_uczestnika_warsztatu ' + str(kl['id_uczestnika']) + ', ' + str(zam_w['id_warsztatu']) + '\n')"""
+                        
                 
 
 parser = argparse.ArgumentParser(description="")
