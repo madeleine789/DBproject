@@ -136,8 +136,6 @@ SELECT YEAR(ZAM.DataZlozeniaZamowienia) Rok,
 	   END) Miesiac,
 	   SUM(ZAM.DoZapltay) Przychod
 FROM Zamowienie ZAM 
-JOIN StatusPlatnosci SP ON SP.ID_StatusuPlatnosci=ZAM.StatusPlatnosci
-WHERE SP.StatusPlatnosci LIKE 'Zaplacone'
 GROUP BY YEAR(ZAM.DataZlozeniaZamowienia), MONTH(ZAM.DataZlozeniaZamowienia) 
 WITH ROLLUP
 GO
