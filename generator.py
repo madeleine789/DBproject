@@ -2,6 +2,7 @@ from random import randint
 import random
 import time
 import datetime
+import argparse
 
 
 
@@ -465,19 +466,18 @@ def generuj_plik(filename, l_konf = 50):
                             f.write('EXEC dodaj_uczestnika_warsztatu ' + str(kl['id_uczestnika']) + ', ' + str(zam_w['id_warsztatu']) + '\n')"""
                 
 
-#print generuj_osobe()
-#print generuj_firme()
+parser = argparse.ArgumentParser(description="")
+
+parser.add_argument("-n", "--number", dest = "number", type=int, default=50,
+                    help = "liczba konferencji - default = 50")
+parser.add_argument("-f", "--file", dest="filename", type=str, default="data.sql",
+					help = "nazwa pliku - default = data.sql")
+
 if __name__ == "__main__":
 
+	args = parser.parse_args()
+	print generuj_plik(args.filename, args.number)
 
-	print generuj_plik('trololo.sql',3)
-#print generuj_konferencja(1,2,1,1,1,1,1)
-#print generuj_daty_konf('1/1/2009', '3/1/2014',random.random())
-
-#print '\n'
-#print generuj_konferencje()
-
-#print generuj_konferencje()
 
 
 
