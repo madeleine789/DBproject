@@ -357,11 +357,13 @@ def generuj_zamowienie(ID_Zamowienia,ID_ZamSzczegolowego,ID_ZamWarsztatu,klient,
 	zamowienie['id_konferencji'] = konferencja['id_konferencji']
 	zamowienie['data_zl_zam'] = daty['data_zlozenia_zam']
 	zamowienie['termin_platnosci'] = daty['termin_zaplaty']
-	zamowienie['do_zaplaty'] = "{0:.2f}".format(daty['procent_ceny'] * int(konferencja['cena']))
+	zamowienie['do_zaplaty'] = int((daty['procent_ceny'] * int(konferencja['cena'])))
+	print zamowienie['do_zaplaty']
 	do_z = int((daty['procent_ceny'] * int(konferencja['cena'])))
 	if klient.has_key('pracownicy'): 
 		do_z = int(do_z * len(klient['pracownicy']))
-	zamowienie['zaplacono'] = random.sample(set([0, int(0.5 * do_z), int(do_z)]),1)[0]
+	zamowienie['zaplacono'] = do_z
+	print zamowienie['zaplacono']
 	if zamowienie['zaplacono'] < zamowienie['do_zaplaty']: 
 		zamowienie['status_platnosci'] = '1'
 		zamowienie['status_rezerwacji'] = '0'

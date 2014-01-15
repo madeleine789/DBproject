@@ -1,4 +1,4 @@
-USE Konferencje
+USE Konferencja
 GO
 
 ------------  100 najczestszych klientow ----------
@@ -100,7 +100,7 @@ SELECT KLI.ID_Klienta ID,
        OS.Imie+' '+OS.Nazwisko Klient, 
        KLI.CzyFirma Firma, OS.Email Email, 
        ZAM.Zaplacono Zaplacono, 
-       ZAM.DoZapltay DoZapltay, 
+       ZAM.DoZapltay DoZaplaty, 
        ZAM.TerminPlatnosci TerminPlatnosci
 FROM Klient KLI
 JOIN Zamowienie ZAM ON	 KLI.ID_Klienta = ZAM.ID_Klienta
