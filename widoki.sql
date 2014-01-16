@@ -1,4 +1,4 @@
-USE Konferencja
+USE Konferencje
 GO
 
 ------------  100 najczestszych klientow ----------
