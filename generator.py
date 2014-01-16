@@ -366,7 +366,7 @@ def generuj_zamowienie(ID_Zamowienia,ID_ZamSzczegolowego,ID_ZamWarsztatu,klient,
 	print zamowienie['zaplacono']
 	if zamowienie['zaplacono'] < zamowienie['do_zaplaty']: 
 		zamowienie['status_platnosci'] = '1'
-		zamowienie['status_rezerwacji'] = '0'
+		zamowienie['status_rezerwacji'] = '1'
 	else: 
 		zamowienie['status_platnosci'] = '2'
 		zamowienie['status_rezerwacji'] = '1'
