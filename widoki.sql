@@ -155,3 +155,39 @@ JOIN ZamowienieWarsztatu ZW ON ZW.ID_Warsztatu=WAR.ID_Warsztatu
 GROUP BY WAR.ID_Warsztatu, CAST(TW.Opis AS VARCHAR(200))
 ORDER BY SUM(ZW.LiczbaMiejsc) DESC
 GO
+
+---------- Lista osobowa dla danej konferencji ---------
+CREATE PROCEDURE lista_osob_konferencja 
+		@id_dnia INT
+AS
+BEGIN
+	SET NOCOUNT ON
+	SELECT OS.Imie,OS.Nazwisko,OS.NrAlbumu, ISNULL(FI.NazwaFirmy,'Osoba prywatna') Klient
+	FROM UczestnikKonferencji UK
+	JOIN Osoba OS ON OS.ID_Osoby=UK.ID_Osoby
+	JOIN ZamowienieSzczegolowe ZS ON ZS.ID_ZamSzczegolowego=UK.ID_ZamSzczegolowego
+	LEFT OUTER JOIN Pracownik PR ON PR.ID_Osoby=OS.ID_Osoby
+	LEFT OUTER JOIN Firma FI ON FI.NIP=PR.NIP
+	WHERE ZS.ID_DniaKonferencji=@id_dnia
+	
+END
+GO
+
+------------ Lista osobowa dla danego warsztatu --------
+CREATE PROCEDURE lista_osob_warsztat 
+		@id_warsztatu INT
+AS
+BEGIN
+	SET NOCOUNT ON
+	SELECT OS.Imie,OS.Nazwisko,OS.NrAlbumu, ISNULL(FI.NazwaFirmy,'Osoba prywatna') Klient
+	FROM UczestnikWarsztatu UW
+	JOIN UczestnikKonferencji UK ON UW.ID_UczestnikaKonferencji=UK.ID_UczestnikaKonferencji
+	JOIN Osoba OS ON OS.ID_Osoby=UK.ID_Osoby
+	JOIN ZamowienieWarsztatu ZW ON ZW.ID_ZamowieniaWarsztatu=UW.ID_ZamowieniaWarsztatu
+	JOIN Warsztat WAR ON WAR.ID_Warsztatu=ZW.ID_Warsztatu
+	LEFT OUTER JOIN Pracownik PR ON PR.ID_Osoby=OS.ID_Osoby
+	LEFT OUTER JOIN Firma FI ON FI.NIP=PR.NIP
+	WHERE WAR.ID_Warsztatu = @id_warsztatu
+	
+END
+GO
