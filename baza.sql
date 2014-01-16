@@ -1,11 +1,12 @@
 CREATE DATABASE Konferencje
 GO
+
 USE Konferencje
 GO
 
 
 CREATE TABLE ZnizkaStudencka (
-        ProcentZnizki SMALLINT
+        ProcentZnizki SMALLINT CHECK(ProcentZnizki > 1 AND ProcentZnizki < 100)
 )
 
 INSERT INTO ZnizkaStudencka (ProcentZnizki) VALUES (50)
@@ -73,20 +74,20 @@ CREATE TABLE Osoba (
 	ID_DanychAdresowych INT FOREIGN KEY REFERENCES DaneAdresowe(ID_DanychAdresowych) NULL ,
 	Imie NVARCHAR(20) NOT NULL ,
 	Nazwisko NVARCHAR(20) NOT NULL ,
-	NrAlbumu NVARCHAR(6) NULL,
-	Telefon NVARCHAR(15) NULL,
-	Email NVARCHAR(32) NULL
+	NrAlbumu NVARCHAR(6) NULL CHECK((LEN(NrAlbumu)=6 AND (NrAlbumu NOT LIKE '%[^0-9]%'))OR (NrAlbumu IS NULL)),
+	Telefon NVARCHAR(15) NULL CHECK(Telefon NOT LIKE '%[^0-9]%' OR Telefon IS NULL),
+	Email NVARCHAR(32) NULL CHECK(Email LIKE '_%@_%._%' OR Email IS NULL)
 
 )
 		
 CREATE TABLE Firma (
-	NIP INT PRIMARY KEY NOT NULL,
+	NIP INT PRIMARY KEY NOT NULL CHECK(NIP NOT LIKE '%[^0-9]%'),
 	ID_Klienta INT UNIQUE FOREIGN KEY REFERENCES Klient(ID_Klienta) NOT NULL,
 	ID_DanychAdresowych INT UNIQUE FOREIGN KEY REFERENCES DaneAdresowe(ID_DanychAdresowych) NOT NULL,
 	NazwaFirmy NVARCHAR(40) NOT NULL,
-	Telefon NVARCHAR(15) NULL,
-	Fax NVARCHAR(24) NULL,
-	Email NVARCHAR(32) NULL
+	Telefon NVARCHAR(15) NULL CHECK(Telefon NOT LIKE '%[^0-9]%' OR Telefon IS NULL),
+	Fax NVARCHAR(24) NULL CHECK(Fax  NOT LIKE '%[^0-9]%' OR Fax IS NULL),
+	Email NVARCHAR(32) NULL CHECK(Email LIKE '_%@_%._%' OR Email IS NULL)
 	
 )
 
