@@ -117,7 +117,7 @@ FROM Klient KLI
 JOIN Zamowienie ZAM ON KLI.ID_Klienta = ZAM.ID_Klienta
 JOIN Firma FI ON FI.ID_Klienta = KLI.ID_Klienta
 ) UnionTable
-WHERE DoZapltay != Zaplacono AND DATEDIFF(DAY, TerminPlatnosci,GETDATE()) >= 7
+WHERE DoZaplaty != Zaplacono AND DATEDIFF(DAY, TerminPlatnosci,GETDATE()) >= 7
 GO
 
 -------- Przychody firmy podzielone na lata i miesiace ------
