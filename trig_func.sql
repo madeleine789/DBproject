@@ -113,9 +113,8 @@ BEGIN
   	SET @idkonferencji = (SELECT ID_DniaKonferencji FROM inserted)
   	SET @potrzebne_miejsca = (SELECT LiczbaMiejsc FROM inserted)
   	SET @limit_miejsc = (SELECT DK.LimitMiejscKonferencja
-  						  FROM ZamowienieSzczegolowe ZS
-  						  JOIN DzienKonferencji DK ON ZS.ID_DniaKonferencji=DK.ID_DniaKonferencji
-  						  WHERE ZS.ID_ZamSzczegolowego = @id_zam_szczeg)
+  						 FROM DzienKonferencji DK
+  						 WHERE DK.ID_DniaKonferencji=@idkonferencji)
 	SET @wykorzystane_miejsca = (SELECT SUM(ZS.LiczbaMiejsc)
   								 FROM ZamowienieSzczegolowe ZS
   								 JOIN DzienKonferencji DK ON ZS.ID_DniaKonferencji=DK.ID_DniaKonferencji
