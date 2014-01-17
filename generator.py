@@ -358,7 +358,6 @@ def generuj_zamowienie(ID_Zamowienia,ID_ZamSzczegolowego,ID_ZamWarsztatu,klient,
 	zamowienie['id_zamowienia'] = str(ID_Zamowienia)
 	zamowienie['id_klienta'] = klient['id_klienta']
 	zamowienie['id_konferencji'] = konferencja['id_konferencji']
-	print zamowienie['id_konferencji']
 	zamowienie['data_zl_zam'] = daty['data_zlozenia_zam']
 	zamowienie['termin_platnosci'] = daty['termin_zaplaty']
 	
@@ -378,7 +377,7 @@ def generuj_zamowienie(ID_Zamowienia,ID_ZamSzczegolowego,ID_ZamWarsztatu,klient,
 		zamowienie['status_platnosci'] = '2'
 		zamowienie['status_rezerwacji'] = '1'
 	zamowienie['status_rejestracji'] = '2'
-	print zamowienie['do_zaplaty'] == zamowienie['zaplacono']
+	
 
 
 
