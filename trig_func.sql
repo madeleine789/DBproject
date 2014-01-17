@@ -181,7 +181,7 @@ BEGIN
 		ELSE
 		BEGIN
 			INSERT INTO ZamowienieWarsztatu
-			SELECT INS.ID_ZamSzczegolowego, INS.ID_Warsztatu, INS.LiczbaMiejsc, INS.StatusRezerwacji FROM inserted INS
+			SELECT INS.ID_ZamSzczegolowego,INS.ID_Warsztatu,INS.LiczbaMiejsc,INS.StatusRezerwacji FROM inserted INS
 		END
 END
 GO
@@ -226,14 +226,17 @@ BEGIN
 								 FROM inserted INS
 								 JOIN ZamowienieWarsztatu ZW ON ZW.ID_ZamowieniaWarsztatu=INS.ID_ZamowieniaWarsztatu
 								 JOIN ZamowienieSzczegolowe ZS ON ZS.ID_ZamSzczegolowego=ZW.ID_ZamSzczegolowego)
+	
 	SET @poczatek_warsztatu = (SELECT WAR.GodzinaRozpoczecia
 							   FROM inserted INS 
 							   JOIN ZamowienieWarsztatu ZW ON ZW.ID_ZamowieniaWarsztatu=INS.ID_ZamowieniaWarsztatu
 							   JOIN Warsztat WAR ON WAR.ID_Warsztatu=ZW.ID_Warsztatu)
+	
 	SET @koniec_warsztatu = (SELECT WAR.GodzinaZakonczenia
 							 FROM inserted INS 
 							 JOIN ZamowienieWarsztatu ZW ON ZW.ID_ZamowieniaWarsztatu=INS.ID_ZamowieniaWarsztatu
 							 JOIN Warsztat WAR ON WAR.ID_Warsztatu=ZW.ID_Warsztatu)
+	
 	SET @liczba_warsztatow = (SELECT COUNT(*)
 							  FROM ZamowienieWarsztatu ZW
 							  JOIN Warsztat WAR ON ZW.ID_Warsztatu=WAR.ID_Warsztatu

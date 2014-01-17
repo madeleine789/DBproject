@@ -44,7 +44,14 @@ GO
 --EXEC dodaj_zamowienie_warsztatu 1,1,1,0
 --SELECT * FROM  ZamowienieWarsztatu
 
---EXEC dodaj_uczestnika_konferencji 9, 9
+--EXEC dodaj_uczestnika_konferencji 1,1
+
+--SELECT * FROM UczestnikKonferencji
+--SELECT * FROM UczestnikWarsztatu
+
+EXEC dodaj_uczestnika_warsztatu 1,3
+EXEC dodaj_uczestnika_warsztatu 1,2
+EXEC dodaj_uczestnika_warsztatu 1,1
 
 
 --SELECT * FROM PrzychodyFirmy
