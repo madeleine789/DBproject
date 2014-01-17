@@ -49,7 +49,7 @@ END
 GO
 
 
-CREATE TRIGGER Trigger_dodaj_dzien
+CREATE TRIGGER Trigger_dodaj_dzienn
 ON DzienKonferencji
 FOR INSERT
 AS
@@ -71,7 +71,7 @@ IF ((SELECT COUNT(*)
 	 FROM DzienKonferencji DK 
 	 JOIN Konferencja KON ON KON.ID_Konferencji=DK.ID_Konferencji
 	 WHERE KON.ID_Konferencji=@Idkonferencji AND @data=DK.DzienKonferencji)
-	 <>0)
+	 >0)
         	BEGIN
               	RAISERROR('Ustalono juz konferencje w tym dniu.',16,1)
               	ROLLBACK TRANSACTION
@@ -220,7 +220,7 @@ BEGIN
 	   WHERE (ZS.ID_ZamSzczegolowego=@id_zamowienia_szczeg AND UK.ID_Osoby=@id_osoby) AND
 			 (WAR.GodzinaRozpoczecia>@poczatek_warsztatu AND WAR.GodzinaRozpoczecia<@koniec_warsztatu)OR
 			 (WAR.GodzinaZakonczenia>@poczatek_warsztatu AND WAR.GodzinaZakonczenia<@koniec_warsztatu))
-			 <>0)
+			 >0)
 	BEGIN
         	RAISERROR('Osoba nie moze isc na dwa warsztaty jednoczesnie.',16,1)
         	ROLLBACK TRANSACTION		
