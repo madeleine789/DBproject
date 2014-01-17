@@ -262,14 +262,17 @@ def generuj_konferencje(l_konferencji = 10):
 	id_zamowienia = 1
 	id_warsztatu = 1
 	id_zamwarsztatu = 1
+	id_konferencji = 1
 
 	lista_klientow_prywatnych = generuj_liste_klientow(200)
 	lista_klientow_firmy = generuj_liste_klientow(100, prywatni = False)
 
 	konferencje = []
 	for i in xrange(0,l_konferencji):
-		id_konferencji = 1
+		
 		konferencja = generuj_konferencja(lista_klientow_prywatnych,lista_klientow_firmy,id_konferencji, id_warsztatu, id_dnia, id_osoby, id_klienta, id_zamowienia, id_zamszczegolowego, id_zamwarsztatu)
+		
+		id_konferencji += 1
 		id_dnia = konferencja['id_dnia']
 		konferencje.append(konferencja)
 	
@@ -355,15 +358,16 @@ def generuj_zamowienie(ID_Zamowienia,ID_ZamSzczegolowego,ID_ZamWarsztatu,klient,
 	zamowienie['id_zamowienia'] = str(ID_Zamowienia)
 	zamowienie['id_klienta'] = klient['id_klienta']
 	zamowienie['id_konferencji'] = konferencja['id_konferencji']
+	print zamowienie['id_konferencji']
 	zamowienie['data_zl_zam'] = daty['data_zlozenia_zam']
 	zamowienie['termin_platnosci'] = daty['termin_zaplaty']
 	zamowienie['do_zaplaty'] = int((daty['procent_ceny'] * int(konferencja['cena'])))
-	print zamowienie['do_zaplaty']
+	#print zamowienie['do_zaplaty']
 	do_z = int((daty['procent_ceny'] * int(konferencja['cena'])))
 	if klient.has_key('pracownicy'): 
 		do_z = int(do_z * len(klient['pracownicy']))
 	zamowienie['zaplacono'] = do_z
-	print zamowienie['zaplacono']
+	#print zamowienie['zaplacono']
 	if zamowienie['zaplacono'] < zamowienie['do_zaplaty']: 
 		zamowienie['status_platnosci'] = '1'
 		zamowienie['status_rezerwacji'] = '1'
