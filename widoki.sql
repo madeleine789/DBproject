@@ -198,7 +198,6 @@ BEGIN
 	LEFT OUTER JOIN Pracownik PR ON PR.ID_Osoby=OS.ID_Osoby
 	LEFT OUTER JOIN Firma FI ON FI.NIP=PR.NIP
 	WHERE ZS.ID_DniaKonferencji=@id_dnia
-	
 END
 GO
 
@@ -217,6 +216,5 @@ BEGIN
 	LEFT OUTER JOIN Pracownik PR ON PR.ID_Osoby=OS.ID_Osoby
 	LEFT OUTER JOIN Firma FI ON FI.NIP=PR.NIP
 	WHERE WAR.ID_Warsztatu = @id_warsztatu
-	
 END
 GO
