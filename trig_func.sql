@@ -260,6 +260,7 @@ BEGIN
 END
 GO
 
+
 --
 CREATE TRIGGER Trigger_czymozna_usunac_zamszczeg
 ON ZamowienieSzczegolowe
@@ -291,7 +292,6 @@ BEGIN
 											WHERE ZS.ID_ZamSzczegolowego = @id_zam_szczegolowego)
 		DELETE FROM ZamowienieWarsztatu WHERE ID_ZamSzczegolowego = @id_zam_szczegolowego
 		DELETE FROM ZamowienieSzczegolowe WHERE ID_ZamSzczegolowego = @id_zam_szczegolowego
-		COMMIT
 	END
 END
 GO
