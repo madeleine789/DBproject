@@ -1,7 +1,7 @@
 USE Konferencje
 GO
 
-
+--
 CREATE FUNCTION jaki_prog (@id_zamowienia INT)
 RETURNS SMALLINT AS
 BEGIN
@@ -25,6 +25,7 @@ BEGIN
 END
 GO
 
+--
 CREATE FUNCTION czy_student(@id_zamowienia INT)
 RETURNS BIT AS
 BEGIN
@@ -48,10 +49,10 @@ BEGIN
 END
 GO
 
-
-CREATE TRIGGER Trigger_dodaj_dzienn
+--
+CREATE TRIGGER Trigger_dodaj_dzien
 ON DzienKonferencji
-FOR INSERT
+INSTEAD OF INSERT
 AS
 BEGIN
 DECLARE @Idkonferencji INT
@@ -60,25 +61,23 @@ DECLARE @data DATE
 SET @idkonferencji = (SELECT ID_Konferencji FROM inserted)
 SET @data = (SELECT DzienKonferencji FROM inserted)
 
-IF (@data < (SELECT KON.DataRozpoczecia FROM Konferencja KON WHERE KON.ID_Konferencji=@idkonferencji) OR
-	@data > (SELECT KON.DataZakonczenia FROM Konferencja KON WHERE KON.ID_Konferencji=@idkonferencji))
-        	BEGIN
-              	RAISERROR('Nie ma konferencji w tym dniu',16,1)
-              	ROLLBACK TRANSACTION
-        	END
-        	
-IF ((SELECT COUNT(*)
-	 FROM DzienKonferencji DK 
-	 JOIN Konferencja KON ON KON.ID_Konferencji=DK.ID_Konferencji
-	 WHERE KON.ID_Konferencji=@Idkonferencji AND @data=DK.DzienKonferencji)
-	 >0)
-        	BEGIN
-              	RAISERROR('Ustalono juz konferencje w tym dniu.',16,1)
-              	ROLLBACK TRANSACTION
-        	END
+IF EXISTS (SELECT *
+		   FROM DzienKonferencji DK 
+		   JOIN Konferencja KON ON KON.ID_Konferencji=DK.ID_Konferencji
+		   WHERE KON.ID_Konferencji=@Idkonferencji AND DK.DzienKonferencji=@data)
+BEGIN
+  	RAISERROR('Ustalono juz konferencje w tym dniu.',16,1)
+  	ROLLBACK TRANSACTION
+END
+ELSE BEGIN
+	INSERT INTO DzienKonferencji
+	SELECT INS.ID_Konferencji,INS.DzienKonferencji,INS.LimitMiejscKonferencja  FROM inserted INS
+END
+
 END
 GO
 
+--
 CREATE TRIGGER Trigger_dodaj_konferencje
    ON  Konferencja
    FOR INSERT
@@ -95,6 +94,7 @@ BEGIN
   	END
 END
 GO
+
 
 CREATE TRIGGER Trigger_limit_miejsc_konferencja
    ON  ZamowienieSzczegolowe
@@ -193,6 +193,7 @@ BEGIN
 	DECLARE @koniec_warsztatu TIME
 	DECLARE @id_zamowienia_szczeg INT
 	DECLARE @id_osoby INT
+	DECLARE @liczba_warsztatow SMALLINT
 	
 	SET @id_osoby = (SELECT UK.ID_Osoby
 					 FROM inserted INS
@@ -210,17 +211,16 @@ BEGIN
 							 FROM inserted INS 
 							 JOIN ZamowienieWarsztatu ZW ON ZW.ID_ZamowieniaWarsztatu=INS.ID_ZamowieniaWarsztatu
 							 JOIN Warsztat WAR ON WAR.ID_Warsztatu=ZW.ID_Warsztatu)
-							 
-	IF((SELECT COUNT(*)
-	   FROM ZamowienieWarsztatu ZW
-	   JOIN Warsztat WAR ON ZW.ID_Warsztatu=WAR.ID_Warsztatu
-	   JOIN UczestnikWarsztatu UW ON UW.ID_ZamowieniaWarsztatu=ZW.ID_ZamowieniaWarsztatu
-	   JOIN ZamowienieSzczegolowe ZS ON ZS.ID_ZamSzczegolowego=ZW.ID_ZamSzczegolowego
-	   JOIN UczestnikKonferencji UK ON UK.ID_UczestnikaKonferencji=UW.ID_UczestnikaKonferencji
-	   WHERE (ZS.ID_ZamSzczegolowego=@id_zamowienia_szczeg AND UK.ID_Osoby=@id_osoby) AND
-			 (WAR.GodzinaRozpoczecia>@poczatek_warsztatu AND WAR.GodzinaRozpoczecia<@koniec_warsztatu)OR
-			 (WAR.GodzinaZakonczenia>@poczatek_warsztatu AND WAR.GodzinaZakonczenia<@koniec_warsztatu))
-			 >0)
+	SET @liczba_warsztatow = (SELECT COUNT(*)
+							  FROM ZamowienieWarsztatu ZW
+							  JOIN Warsztat WAR ON ZW.ID_Warsztatu=WAR.ID_Warsztatu
+							  JOIN UczestnikWarsztatu UW ON UW.ID_ZamowieniaWarsztatu=ZW.ID_ZamowieniaWarsztatu
+							  JOIN ZamowienieSzczegolowe ZS ON ZS.ID_ZamSzczegolowego=ZW.ID_ZamSzczegolowego
+							  JOIN UczestnikKonferencji UK ON UK.ID_UczestnikaKonferencji=UW.ID_UczestnikaKonferencji
+							  WHERE (ZS.ID_ZamSzczegolowego=@id_zamowienia_szczeg AND UK.ID_Osoby=@id_osoby) AND
+								    (WAR.GodzinaRozpoczecia>@poczatek_warsztatu AND WAR.GodzinaRozpoczecia<@koniec_warsztatu)OR
+								    (WAR.GodzinaZakonczenia>@poczatek_warsztatu AND WAR.GodzinaZakonczenia<@koniec_warsztatu)) 
+	IF(@liczba_warsztatow>0)
 	BEGIN
         	RAISERROR('Osoba nie moze isc na dwa warsztaty jednoczesnie.',16,1)
         	ROLLBACK TRANSACTION		
