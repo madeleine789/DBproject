@@ -107,19 +107,25 @@ BEGIN
   	DECLARE @limit_miejsc INT
   	DECLARE @idkonferencji INT
   	DECLARE @wykorzystane_miejsca INT
-  	DECLARE @id_zam_szczeg INT
-  	
-  	SET @id_zam_szczeg = (SELECT ID_ZamSzczegolowego FROM inserted)
+ 
   	SET @idkonferencji = (SELECT ID_DniaKonferencji FROM inserted)
   	SET @potrzebne_miejsca = (SELECT LiczbaMiejsc FROM inserted)
   	SET @limit_miejsc = (SELECT DK.LimitMiejscKonferencja
   						 FROM DzienKonferencji DK
   						 WHERE DK.ID_DniaKonferencji=@idkonferencji)
+  	IF EXISTS (SELECT DK.ID_DniaKonferencji
+			   FROM ZamowienieSzczegolowe ZS
+			   JOIN DzienKonferencji DK ON ZS.ID_DniaKonferencji=DK.ID_DniaKonferencji
+			   GROUP BY DK.ID_DniaKonferencji
+			   HAVING DK.ID_DniaKonferencji = @idkonferencji)
 	SET @wykorzystane_miejsca = (SELECT SUM(ZS.LiczbaMiejsc)
-  								 FROM ZamowienieSzczegolowe ZS
-  								 JOIN DzienKonferencji DK ON ZS.ID_DniaKonferencji=DK.ID_DniaKonferencji
-  								 GROUP BY DK.ID_DniaKonferencji
-  								 HAVING DK.ID_DniaKonferencji = @idkonferencji)
+							     FROM ZamowienieSzczegolowe ZS
+							     JOIN DzienKonferencji DK ON ZS.ID_DniaKonferencji=DK.ID_DniaKonferencji
+							     GROUP BY DK.ID_DniaKonferencji
+							     HAVING DK.ID_DniaKonferencji = @idkonferencji)
+	ELSE
+		SET @wykorzystane_miejsca=0
+	
   	SET @wolne_miejsca = @limit_miejsc - @wykorzystane_miejsca
   	
   	IF @potrzebne_miejsca > @wolne_miejsca 
@@ -130,7 +136,7 @@ BEGIN
 		ELSE 
 		BEGIN
 			INSERT INTO ZamowienieSzczegolowe
-			SELECT INS.ID_DniaKonferencji,INS.ID_Zamowienia,INS.LiczbaMiejsc FROM inserted INS
+			SELECT INS.ID_Zamowienia,INS.ID_DniaKonferencji,INS.LiczbaMiejsc FROM inserted INS
 		END
         	
 END
@@ -153,13 +159,18 @@ BEGIN
   	SET @potrzebne_miejsca = (SELECT LiczbaMiejsc FROM inserted)
   	SET @limit_miejsc = (SELECT LimitMiejscWarsztat
   						 FROM Warsztat WAR
-  						 JOIN ZamowienieWarsztatu ZW ON ZW.ID_Warsztatu=WAR.ID_Warsztatu
   						 WHERE WAR.ID_Warsztatu=@id_warsztatu)
+	IF EXISTS (SELECT ZW.ID_Warsztatu
+			   FROM ZamowienieWarsztatu ZW
+			   GROUP BY ZW.ID_Warsztatu
+			   HAVING ZW.ID_Warsztatu = @id_warsztatu)
 	SET @wykorzystane_miejsca = (SELECT SUM(ZW.LiczbaMiejsc)
   								 FROM ZamowienieWarsztatu ZW
-  								 JOIN Warsztat WAR ON WAR.ID_Warsztatu=ZW.ID_ZamowieniaWarsztatu
-  								 GROUP BY WAR.ID_Warsztatu
-  								 HAVING WAR.ID_Warsztatu = @id_warsztatu)
+  								 GROUP BY ZW.ID_Warsztatu
+  								 HAVING ZW.ID_Warsztatu = @id_warsztatu)
+  	ELSE
+  		SET @wykorzystane_miejsca=0
+  		
   	SET @wolne_miejsca = @limit_miejsc - @wykorzystane_miejsca
   	
   	IF @potrzebne_miejsca > @wolne_miejsca
@@ -170,7 +181,7 @@ BEGIN
 		ELSE
 		BEGIN
 			INSERT INTO ZamowienieWarsztatu
-			SELECT INS.ID_Warsztatu,INS.ID_ZamSzczegolowego,INS.LiczbaMiejsc,INS.StatusRezerwacji FROM inserted INS
+			SELECT INS.ID_ZamSzczegolowego, INS.ID_Warsztatu, INS.LiczbaMiejsc, INS.StatusRezerwacji FROM inserted INS
 		END
 END
 GO
