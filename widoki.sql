@@ -156,6 +156,35 @@ GROUP BY WAR.ID_Warsztatu, CAST(TW.Opis AS VARCHAR(200))
 ORDER BY SUM(ZW.LiczbaMiejsc) DESC
 GO
 
+--------- Aktualne zamowienia ---------
+CREATE VIEW AktualneZamowienia AS
+SELECT OS.Imie+' '+OS.Nazwisko Klient, 
+	   ZAM.DoZapltay, ZAM.Zaplacono,
+	   ZAM.StatusPlatnosci, 
+	   ZAM.TerminPlatnosci, 
+	   ZAM.StatusRezerwacji, 
+	   KON.DataRozpoczecia DataRozpoczeciaKonferencji
+FROM Zamowienie ZAM
+JOIN Klient KLI ON KLI.ID_Klienta=ZAM.ID_Klienta
+JOIN Osoba OS ON OS.ID_Klienta=KLI.ID_Klienta
+JOIN Konferencja KON ON KON.ID_Konferencji=ZAM.ID_Konferencji
+WHERE ZAM.StatusRejestracji = 1 
+UNION
+SELECT FI.NazwaFirmy Klient, 
+	   ZAM.DoZapltay, 
+	   ZAM.Zaplacono,
+	   ZAM.StatusPlatnosci, 
+	   ZAM.TerminPlatnosci, 
+	   ZAM.StatusRezerwacji,
+	   KON.DataRozpoczecia DataRozpoczeciaKonferencji
+FROM Zamowienie ZAM
+JOIN Klient KLI ON KLI.ID_Klienta=ZAM.ID_Klienta
+JOIN Firma FI ON FI.ID_Klienta=KLI.ID_Klienta
+JOIN Konferencja KON ON KON.ID_Konferencji=ZAM.ID_Konferencji
+WHERE ZAM.StatusRejestracji = 1 
+ORDER BY TerminPlatnosci DESC
+GO
+
 ---------- Lista osobowa dla danej konferencji ---------
 CREATE PROCEDURE lista_osob_konferencja 
 		@id_dnia INT
