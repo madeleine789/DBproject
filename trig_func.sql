@@ -95,10 +95,10 @@ BEGIN
 END
 GO
 
-
+--
 CREATE TRIGGER Trigger_limit_miejsc_konferencja
    ON  ZamowienieSzczegolowe
-   FOR INSERT
+   INSTEAD OF INSERT
 AS
 BEGIN
   	SET NOCOUNT ON;
@@ -123,18 +123,24 @@ BEGIN
   								 HAVING DK.ID_DniaKonferencji = @idkonferencji)
   	SET @wolne_miejsca = @limit_miejsc - @wykorzystane_miejsca
   	
-  	IF @potrzebne_miejsca > @wolne_miejsca
-        	BEGIN
-              	RAISERROR('Nie ma odpowiedniej ilosci wolnych miejsc.',16,1)
-              	ROLLBACK TRANSACTION
-        	END
+  	IF @potrzebne_miejsca > @wolne_miejsca 
+  	BEGIN
+        RAISERROR('Nie ma odpowiedniej ilosci wolnych miejsc.',16,1)
+        ROLLBACK TRANSACTION
+    END
+		ELSE 
+		BEGIN
+			INSERT INTO ZamowienieSzczegolowe
+			SELECT INS.ID_DniaKonferencji,INS.ID_Zamowienia,INS.LiczbaMiejsc FROM inserted INS
+		END
         	
 END
 GO
 
+--
 CREATE TRIGGER Trigger_limit_miejsc_warsztat
    ON  ZamowienieWarsztatu
-   FOR INSERT
+   INSTEAD OF INSERT
 AS
 BEGIN
   	SET NOCOUNT ON;
@@ -158,13 +164,19 @@ BEGIN
   	SET @wolne_miejsca = @limit_miejsc - @wykorzystane_miejsca
   	
   	IF @potrzebne_miejsca > @wolne_miejsca
-        	BEGIN
-              	RAISERROR('Nie ma odpowiedniej ilosci wolnych miejsc.',16,1)
-              	ROLLBACK TRANSACTION
-        	END
+	BEGIN
+      	RAISERROR('Nie ma odpowiedniej ilosci wolnych miejsc.',16,1)
+      	ROLLBACK TRANSACTION
+	END
+		ELSE
+		BEGIN
+			INSERT INTO ZamowienieWarsztatu
+			SELECT INS.ID_Warsztatu,INS.ID_ZamSzczegolowego,INS.LiczbaMiejsc,INS.StatusRezerwacji FROM inserted INS
+		END
 END
 GO
 
+--
 CREATE TRIGGER Trigger_dodaj_warsztat
 ON  Warsztat
 FOR INSERT
@@ -184,9 +196,10 @@ BEGIN
 END
 GO
 
+--
 CREATE TRIGGER Trigger_dodaj_uczestnika_warsztatu
 ON UczestnikWarsztatu
-FOR INSERT
+INSTEAD OF INSERT
 AS
 BEGIN
 	DECLARE @poczatek_warsztatu TIME	
@@ -224,11 +237,17 @@ BEGIN
 	BEGIN
         	RAISERROR('Osoba nie moze isc na dwa warsztaty jednoczesnie.',16,1)
         	ROLLBACK TRANSACTION		
-	END							 
+	END	
+	ELSE
+	BEGIN
+		INSERT INTO UczestnikWarsztatu
+		SELECT INS.ID_UczestnikaKonferencji, INS.ID_ZamowieniaWarsztatu FROM inserted INS
+	END						 
 	
 END
 GO
 
+--
 CREATE TRIGGER Trigger_czymozna_usunac_zamszczeg
 ON ZamowienieSzczegolowe
 INSTEAD OF DELETE
@@ -264,6 +283,7 @@ BEGIN
 END
 GO
 
+--
 CREATE TRIGGER Trigger_czymozna_usunac_warsztat
 ON ZamowienieWarsztatu
 INSTEAD OF DELETE
@@ -298,7 +318,7 @@ BEGIN
 END
 GO
 
-
+--
 CREATE TRIGGER Trigger_akt_dozaplaty_zamszczeg
 ON ZamowienieSzczegolowe
 AFTER INSERT
@@ -334,6 +354,7 @@ AS BEGIN
 END
 GO
 
+--
 CREATE TRIGGER Trigger_akt_dozaplaty_warsztat
 ON ZamowienieWarsztatu
 AFTER INSERT
