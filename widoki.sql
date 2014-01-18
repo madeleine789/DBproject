@@ -3,28 +3,58 @@ GO
 
 ------------  100 najczestszych klientow ----------
 CREATE VIEW NajczestsiKlienci AS
-SELECT TOP 100 ID, Klient, Firma, Email
+SELECT TOP 100 Klient, Firma, Email, LiczbaZamowien
 FROM
 (
-SELECT KLI.ID_Klienta ID, 
-       OS.Imie+' '+OS.Nazwisko Klient, 
+SELECT OS.Imie+' '+OS.Nazwisko Klient, 
        KLI.CzyFirma Firma, 
-       OS.Email Email
+       OS.Email Email,
+       COUNT(*) LiczbaZamowien
 FROM Klient KLI
 JOIN Zamowienie ZAM ON KLI.ID_Klienta = ZAM.ID_Klienta
 JOIN Osoba OS ON OS.ID_Klienta = KLI.ID_Klienta
 GROUP BY KLI.ID_Klienta, OS.Imie+' '+OS.Nazwisko, KLI.CzyFirma, OS.Email
 UNION
-SELECT KLI.ID_Klienta ID, 
-       FI.NazwaFirmy Klient,
+SELECT FI.NazwaFirmy Klient,
        KLI.CzyFirma Firma, 
-       FI.Email Email
+       FI.Email Email,
+       COUNT(*) LiczbaZamowien
 FROM Klient KLI
 JOIN Zamowienie ZAM ON KLI.ID_Klienta = ZAM.ID_Klienta
 JOIN Firma FI ON FI.ID_Klienta = KLI.ID_Klienta
 GROUP BY KLI.ID_Klienta, FI.NazwaFirmy, KLI.CzyFirma, FI.Email
 ) UnionTable
-GROUP BY ID, Klient, Firma, Email
+GROUP BY Klient, Firma, Email, LiczbaZamowien
+ORDER BY LiczbaZamowien DESC
+GO
+
+--------- 100 klientow ktorzy zlozyli zamowienia na najwieksza kwote ----
+CREATE VIEW KlienciNajwiekszaKwota AS
+SELECT TOP 100 ID, Klient, Firma, Email, KwotaZamowien
+FROM
+(
+SELECT KLI.ID_Klienta ID,
+	   OS.Imie+' '+OS.Nazwisko Klient, 
+       KLI.CzyFirma Firma, 
+       OS.Email Email,
+       SUM(ZAM.Zaplacono) KwotaZamowien
+FROM Klient KLI
+JOIN Zamowienie ZAM ON KLI.ID_Klienta = ZAM.ID_Klienta
+JOIN Osoba OS ON OS.ID_Klienta = KLI.ID_Klienta
+GROUP BY KLI.ID_Klienta, OS.Imie+' '+OS.Nazwisko, KLI.CzyFirma, OS.Email
+UNION
+SELECT KLI.ID_Klienta ID,
+	   FI.NazwaFirmy Klient,
+       KLI.CzyFirma Firma, 
+       FI.Email Email,
+       SUM(ZAM.Zaplacono) KwotaZamowien
+FROM Klient KLI
+JOIN Zamowienie ZAM ON KLI.ID_Klienta = ZAM.ID_Klienta
+JOIN Firma FI ON FI.ID_Klienta = KLI.ID_Klienta
+GROUP BY KLI.ID_Klienta, FI.NazwaFirmy, KLI.CzyFirma, FI.Email
+) UnionTable
+GROUP BY ID, Klient, Firma, Email, KwotaZamowien
+ORDER BY KwotaZamowien DESC
 GO
 
 ----------- Dostepne konferencje dla klienta -------------
