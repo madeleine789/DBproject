@@ -34,7 +34,7 @@ GO
 --SELECT * FROM Klient
 
 --EXEC dodaj_klienta_osoba "Julian", "Zak", NULL, "873938701", "jzak@jestemailem.pl", "Slupska 156", "Szczecin", "70-233", "Polska"
---EXEC dodaj_zamowienie 1, 5, "07/12/2012", 2, 1, 580, 580, "07/30/2012", 2
+--EXEC dodaj_zamowienie 1, 5, "07/12/2012", 2, 1, 0, 0, "07/30/2012", 2
 --EXEC dodaj_zamowienie_szcz 1,6,1
 
 --SELECT * FROM ZamowienieSzczegolowe
@@ -44,10 +44,19 @@ GO
 --EXEC dodaj_zamowienie_warsztatu 1,1,1,0
 --SELECT * FROM  ZamowienieWarsztatu
 
---EXEC dodaj_uczestnika_konferencji 9, 9
+--EXEC dodaj_uczestnika_konferencji 1,1
 
+--SELECT * FROM UczestnikKonferencji
+--SELECT * FROM UczestnikWarsztatu
 
---SELECT * FROM PrzychodyFirmy
+--EXEC dodaj_uczestnika_warsztatu 1,3
+--EXEC dodaj_uczestnika_warsztatu 1,2
+--EXEC dodaj_uczestnika_warsztatu 1,1
+
+--DELETE FROM ZamowienieSzczegolowe
+--WHERE ID_ZamSzczegolowego=1
+
+--SELECT * FROM Przychod
 --SELECT * FROM NieprawidlowaKwota
 --SELECT * FROM NiepotwierdzoneDane
 --SELECT * FROM NajpopularniejszeWarsztaty

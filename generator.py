@@ -264,7 +264,7 @@ def generuj_konferencje(l_konferencji = 10):
 	id_zamwarsztatu = 1
 	id_konferencji = 1
 
-	lista_klientow_prywatnych = generuj_liste_klientow(200)
+	lista_klientow_prywatnych = generuj_liste_klientow(300)
 	lista_klientow_firmy = generuj_liste_klientow(100, prywatni = False)
 
 	konferencje = []
@@ -358,7 +358,6 @@ def generuj_zamowienie(ID_Zamowienia,ID_ZamSzczegolowego,ID_ZamWarsztatu,klient,
 	zamowienie['id_zamowienia'] = str(ID_Zamowienia)
 	zamowienie['id_klienta'] = klient['id_klienta']
 	zamowienie['id_konferencji'] = konferencja['id_konferencji']
-	print zamowienie['id_konferencji']
 	zamowienie['data_zl_zam'] = daty['data_zlozenia_zam']
 	zamowienie['termin_platnosci'] = daty['termin_zaplaty']
 	
@@ -378,7 +377,7 @@ def generuj_zamowienie(ID_Zamowienia,ID_ZamSzczegolowego,ID_ZamWarsztatu,klient,
 		zamowienie['status_platnosci'] = '2'
 		zamowienie['status_rezerwacji'] = '1'
 	zamowienie['status_rejestracji'] = '2'
-	print zamowienie['do_zaplaty'] == zamowienie['zaplacono']
+	
 
 
 
