@@ -70,7 +70,7 @@ AS BEGIN
 						  WHERE ZW.ID_ZamowieniaWarsztatu = @id_zam_warsztatu
 						  )
 						  
-	IF(czy_student(@id_zamowienia)) SET @znizka = (SELECT ZS.ProcentZnizki FROM ZnizkaStudencka ZS)
+	IF(dbo.czy_student(@id_zamowienia)=1) SET @znizka = (SELECT ZS.ProcentZnizki FROM ZnizkaStudencka ZS)
 	ELSE SET @znizka = 100
 	
 	SET @ilosc_osob = (SELECT ZW.LiczbaMiejsc
@@ -101,13 +101,13 @@ BEGIN
 	
 	SET @cena_za_osobe = (SELECT KON.Cena
 						  FROM ZamowienieSzczegolowe ZS
-						  JOIN DzienKonferencji DK ON DK.DzienKonferencji=ZS.ID_DniaKonferencji
+						  JOIN DzienKonferencji DK ON DK.ID_DniaKonferencji=ZS.ID_DniaKonferencji
 						  JOIN Konferencja KON ON KON.ID_Konferencji=DK.ID_Konferencji
 						  WHERE ZS.ID_Zamowienia=@id_zamowienia
 						  )
 						  
-	SET @prog = jaki_prog(@id_zamowienia)	
-	IF(czy_student(@id_zamowienia)) SET @znizka = (SELECT ZS.ProcentZnizki FROM ZnizkaStudencka ZS)
+	SET @prog = dbo.jaki_prog(@id_zamowienia)	
+	IF(dbo.czy_student(@id_zamowienia)=1) SET @znizka = (SELECT ZS.ProcentZnizki FROM ZnizkaStudencka ZS)
 	ELSE SET @znizka = 100
 	
 	SET @ilosc_osob = (SELECT ZS.LiczbaMiejsc
@@ -416,7 +416,7 @@ AS BEGIN
 	SET @dotychczasowa_oplata = (SELECT DoZapltay FROM Zamowienie ZAM WHERE ZAM.ID_Zamowienia=@id_zamowienia)
 	
 	UPDATE Zamowienie
-	SET DoZapltay = @dotychczasowa_oplata + kwota_za_zam_szczeg(@id_zam_szczeg)
+	SET DoZapltay = @dotychczasowa_oplata + dbo.kwota_za_zam_szczeg(@id_zam_szczeg)
 	WHERE ID_Zamowienia=@id_zamowienia
 				
 END
@@ -441,7 +441,7 @@ AS BEGIN
 	SET @dotychczasowa_oplata = (SELECT DoZapltay FROM Zamowienie ZAM WHERE ZAM.ID_Zamowienia=@id_zamowienia)
 	
 	UPDATE Zamowienie
-	SET DoZapltay = @dotychczasowa_oplata + kwota_za_zam_warsztatu(@id_zam_warsztatu)
+	SET DoZapltay = @dotychczasowa_oplata + dbo.kwota_za_zam_warsztatu(@id_zam_warsztatu)
 	WHERE ID_Zamowienia=@id_zamowienia
 				
 END
