@@ -264,7 +264,7 @@ def generuj_konferencje(l_konferencji = 10):
 	id_zamwarsztatu = 1
 	id_konferencji = 1
 
-	lista_klientow_prywatnych = generuj_liste_klientow(200)
+	lista_klientow_prywatnych = generuj_liste_klientow(300)
 	lista_klientow_firmy = generuj_liste_klientow(100, prywatni = False)
 
 	konferencje = []
