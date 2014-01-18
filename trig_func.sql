@@ -332,77 +332,49 @@ END
 GO
 
 --
-CREATE TRIGGER Trigger_akt_dozaplaty_zamszczeg
+CREATE TRIGGER Trigger_akt_dod_dozaplaty_zamszczeg
 ON ZamowienieSzczegolowe
-AFTER INSERT, DELETE
+AFTER INSERT
 AS BEGIN
 	DECLARE @id_zamowienia AS INT
 	DECLARE @id_zam_szczeg AS INT
 	DECLARE @dotychczasowa_oplata AS MONEY
 
-	IF EXISTS (SELECT * FROM inserted) BEGIN
-		SET @id_zam_szczeg = (SELECT INS.ID_ZamSzczegolowego FROM inserted INS)
-		SET @id_zamowienia = (SELECT INS.ID_Zamowienia FROM inserted INS)
-		SET @dotychczasowa_oplata = (SELECT DoZapltay FROM Zamowienie ZAM WHERE ZAM.ID_Zamowienia=@id_zamowienia)
-		
-		UPDATE Zamowienie
-		SET DoZapltay = @dotychczasowa_oplata + dbo.kwota_za_zam_szczeg(@id_zam_szczeg)
-		WHERE ID_Zamowienia=@id_zamowienia
-	END ELSE BEGIN
-		SET @id_zam_szczeg = (SELECT DEL.ID_ZamSzczegolowego FROM deleted DEL)
-		SET @id_zamowienia = (SELECT DEL.ID_Zamowienia FROM deleted DEL)
-		SET @dotychczasowa_oplata = (SELECT DoZapltay FROM Zamowienie ZAM WHERE ZAM.ID_Zamowienia=@id_zamowienia)
-		
-		UPDATE Zamowienie
-		SET DoZapltay = @dotychczasowa_oplata - dbo.kwota_za_zam_szczeg(@id_zam_szczeg)
-		WHERE ID_Zamowienia=@id_zamowienia
-	END
-				
+	SET @id_zam_szczeg = (SELECT INS.ID_ZamSzczegolowego FROM inserted INS)
+	SET @id_zamowienia = (SELECT INS.ID_Zamowienia FROM inserted INS)
+	SET @dotychczasowa_oplata = (SELECT DoZapltay FROM Zamowienie ZAM WHERE ZAM.ID_Zamowienia=@id_zamowienia)
+	
+	UPDATE Zamowienie
+	SET DoZapltay = @dotychczasowa_oplata + dbo.kwota_za_zam_szczeg(@id_zam_szczeg)
+	WHERE ID_Zamowienia=@id_zamowienia		
 END
 GO
 
 --
-CREATE TRIGGER Trigger_akt_dozaplaty_warsztat
+CREATE TRIGGER Trigger_akt_dod_dozaplaty_warsztat
 ON ZamowienieWarsztatu
-AFTER INSERT, DELETE
+AFTER INSERT
 AS BEGIN
 	DECLARE @dotychczasowa_oplata AS MONEY
+	DECLARE @id_zamowienia AS INT
+	DECLARE @id_zam_warsztatu AS INT
+	SET @id_zam_warsztatu = (SELECT INS.ID_ZamowieniaWarsztatu FROM inserted INS)
+	SET @id_zamowienia = (SELECT ZS.ID_Zamowienia
+						  FROM ZamowienieSzczegolowe ZS
+						  JOIN ZamowienieWarsztatu ZW ON ZS.ID_ZamSzczegolowego=ZW.ID_ZamSzczegolowego
+						  WHERE ZW.ID_ZamowieniaWarsztatu = @id_zam_warsztatu)
 
-	IF EXISTS (SELECT * FROM inserted) BEGIN
-		DECLARE @id_zamowienia AS INT
-		DECLARE @id_zam_warsztatu AS INT
-		SET @id_zam_warsztatu = (SELECT INS.ID_ZamowieniaWarsztatu FROM inserted INS)
-		SET @id_zamowienia = (SELECT ZS.ID_Zamowienia
-							  FROM ZamowienieSzczegolowe ZS
-							  JOIN ZamowienieWarsztatu ZW ON ZS.ID_ZamSzczegolowego=ZW.ID_ZamSzczegolowego
-							  WHERE ZW.ID_ZamowieniaWarsztatu = @id_zam_warsztatu)
-
-		SET @dotychczasowa_oplata = (SELECT DoZapltay FROM Zamowienie ZAM WHERE ZAM.ID_Zamowienia=@id_zamowienia)
-		
-		UPDATE Zamowienie
-		SET DoZapltay = @dotychczasowa_oplata + dbo.kwota_za_zam_warsztatu(@id_zam_warsztatu)
-		WHERE ID_Zamowienia=@id_zamowienia
-	END ELSE BEGIN
-		SET @id_zamowienia = (SELECT DISTINCT ZS.ID_Zamowienia
-							  FROM ZamowienieSzczegolowe ZS
-							  JOIN ZamowienieWarsztatu ZW ON ZS.ID_ZamSzczegolowego=ZW.ID_ZamSzczegolowego
-							  WHERE ZW.ID_ZamowieniaWarsztatu IN (SELECT DEL.ID_ZamowieniaWarsztatu FROM deleted DEL))
-		DECLARE @kwota AS MONEY
-		SET @kwota = (SELECT SUM(dbo.kwota_za_zam_warsztatu(ZW.ID_ZamowieniaWarsztatu))
-					  FROM ZamowienieWarsztatu ZW
-					  WHERE ZW.ID_ZamowieniaWarsztatu IN (SELECT DEL.ID_ZamowieniaWarsztatu FROM deleted DEL))
-		SET @dotychczasowa_oplata = (SELECT DoZapltay FROM Zamowienie ZAM WHERE ZAM.ID_Zamowienia=@id_zamowienia)
-		
-		UPDATE Zamowienie
-		SET DoZapltay = @dotychczasowa_oplata - @kwota
-		WHERE ID_Zamowienia=@id_zamowienia
-	END			
+	SET @dotychczasowa_oplata = (SELECT DoZapltay FROM Zamowienie ZAM WHERE ZAM.ID_Zamowienia=@id_zamowienia)
+	
+	UPDATE Zamowienie
+	SET DoZapltay = @dotychczasowa_oplata + dbo.kwota_za_zam_warsztatu(@id_zam_warsztatu)
+	WHERE ID_Zamowienia=@id_zamowienia		
 END
 GO
 
+-- 
 
---
-CREATE TRIGGER Trigger_czymozna_usunac_zamszczeg
+CREATE TRIGGER Trigger_usun_zamszczeg
 ON ZamowienieSzczegolowe
 INSTEAD OF DELETE
 AS
@@ -426,10 +398,10 @@ BEGIN
 	ELSE
 	BEGIN
 		DELETE FROM UczestnikWarsztatu 
-			WHERE ID_ZamowieniaWarsztatu IN (SELECT ZW.ID_ZamowieniaWarsztatu
-											 FROM ZamowienieWarsztatu ZW
-											 JOIN ZamowienieSzczegolowe ZS ON ZS.ID_ZamSzczegolowego=ZW.ID_ZamSzczegolowego
-											 WHERE ZS.ID_ZamSzczegolowego = @id_zam_szczegolowego)
+		WHERE ID_ZamowieniaWarsztatu IN (SELECT ZW.ID_ZamowieniaWarsztatu
+										 FROM ZamowienieWarsztatu ZW
+										 JOIN ZamowienieSzczegolowe ZS ON ZS.ID_ZamSzczegolowego=ZW.ID_ZamSzczegolowego
+										 WHERE ZS.ID_ZamSzczegolowego = @id_zam_szczegolowego)
 		DELETE FROM UczestnikKonferencji WHERE ID_ZamSzczegolowego = @id_zam_szczegolowego									 
 		DELETE FROM ZamowienieWarsztatu WHERE ID_ZamSzczegolowego = @id_zam_szczegolowego
 		DELETE FROM ZamowienieSzczegolowe WHERE ID_ZamSzczegolowego = @id_zam_szczegolowego
