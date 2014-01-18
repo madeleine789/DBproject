@@ -197,6 +197,31 @@ INSERT INTO Prog (ID_Progu, ProcentCeny, GornyProgCzasowy, DolnyProgCzasowy) VAL
 GO
 
 ----------------------------------------------------------------------------------------------------------------
+CREATE PROCEDURE nowy_prog
+	@ProcentCeny SMALLINT,
+	@GornyProgCzasowy SMALLINT,
+    @DolnyProgCzasowy SMALLINT
+AS
+BEGIN 
+	SET NOCOUNT ON;
+	INSERT INTO Prog(ProcentCeny,GornyProgCzasowy,DolnyProgCzasowy)
+	VALUES(@ProcentCeny,@GornyProgCzasowy,@DolnyProgCzasowy)
+END
+GO
+       
+
+CREATE PROCEDURE nowy_prog_cenowy
+	@ID_Progu INT,
+	@ID_Konferencji INT
+
+AS
+BEGIN
+	SET NOCOUNT ON;
+		INSERT INTO ProgiCenowe
+		VALUES(@ID_Progu,@ID_Konferencji)
+END
+GO
+
 
 CREATE PROCEDURE nowy_adres
 	@Adres NVARCHAR(45),
