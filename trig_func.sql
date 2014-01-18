@@ -50,6 +50,77 @@ END
 GO
 
 --
+CREATE FUNCTION kwota_za_zam_warsztatu (@id_zam_warsztatu INT)
+RETURNS MONEY
+AS BEGIN
+	DECLARE @id_zamowienia AS INT
+	DECLARE @cena_za_osobe AS MONEY
+	DECLARE @znizka AS SMALLINT
+	DECLARE @ilosc_osob AS INT
+	DECLARE @kwota MONEY
+	
+	SET @id_zamowienia = (SELECT ZS.ID_Zamowienia
+						  FROM ZamowienieSzczegolowe ZS
+						  JOIN ZamowienieWarsztatu ZW ON ZS.ID_ZamSzczegolowego=ZW.ID_ZamSzczegolowego
+						  WHERE ZW.ID_ZamowieniaWarsztatu = @id_zam_warsztatu)
+	
+	SET @cena_za_osobe = (SELECT WAR.Cena
+						  FROM Warsztat WAR
+						  JOIN ZamowienieWarsztatu ZW ON ZW.ID_Warsztatu=WAR.ID_Warsztatu
+						  WHERE ZW.ID_ZamowieniaWarsztatu = @id_zam_warsztatu
+						  )
+						  
+	IF(czy_student(@id_zamowienia)) SET @znizka = (SELECT ZS.ProcentZnizki FROM ZnizkaStudencka ZS)
+	ELSE SET @znizka = 100
+	
+	SET @ilosc_osob = (SELECT ZW.LiczbaMiejsc
+					   FROM ZamowienieWarsztatu ZW
+					   WHERE ZW.ID_ZamowieniaWarsztatu=@id_zam_warsztatu)
+	
+	SET @kwota = (@znizka/100)*(@ilosc_osob*@cena_za_osobe)
+	RETURN @kwota
+				
+END
+GO
+
+--
+CREATE FUNCTION kwota_za_zam_szczeg (@id_zam_szczeg INT)
+RETURNS MONEY
+AS
+BEGIN
+	DECLARE @kwota MONEY
+	DECLARE @cena_za_osobe AS MONEY
+	DECLARE @prog AS SMALLINT
+	DECLARE @znizka AS SMALLINT
+	DECLARE @ilosc_osob AS INT
+	DECLARE @id_zamowienia AS INT
+	
+	SET @id_zamowienia = (SELECT ZS.ID_Zamowienia
+						  FROM ZamowienieSzczegolowe ZS
+						  WHERE ZS.ID_ZamSzczegolowego=@id_zam_szczeg)
+	
+	SET @cena_za_osobe = (SELECT KON.Cena
+						  FROM ZamowienieSzczegolowe ZS
+						  JOIN DzienKonferencji DK ON DK.DzienKonferencji=ZS.ID_DniaKonferencji
+						  JOIN Konferencja KON ON KON.ID_Konferencji=DK.ID_Konferencji
+						  WHERE ZS.ID_Zamowienia=@id_zamowienia
+						  )
+						  
+	SET @prog = jaki_prog(@id_zamowienia)	
+	IF(czy_student(@id_zamowienia)) SET @znizka = (SELECT ZS.ProcentZnizki FROM ZnizkaStudencka ZS)
+	ELSE SET @znizka = 100
+	
+	SET @ilosc_osob = (SELECT ZS.LiczbaMiejsc
+					   FROM ZamowienieSzczegolowe ZS
+					   WHERE ZS.ID_ZamSzczegolowego=@id_zam_szczeg)
+					   
+	SET @kwota = (@znizka/100)*(@prog/100)*(@ilosc_osob*@cena_za_osobe)
+				
+	RETURN @kwota
+END
+GO
+
+--
 CREATE TRIGGER Trigger_dodaj_dzien
 ON DzienKonferencji
 INSTEAD OF INSERT
@@ -337,31 +408,15 @@ ON ZamowienieSzczegolowe
 AFTER INSERT
 AS BEGIN
 	DECLARE @id_zamowienia AS INT
-	DECLARE @cena_za_osobe AS MONEY
-	DECLARE @prog AS SMALLINT
-	DECLARE @znizka AS SMALLINT
-	DECLARE @ilosc_osob AS INT
+	DECLARE @id_zam_szczeg AS INT
 	DECLARE @dotychczasowa_oplata AS MONEY
-	
-	SET @id_zamowienia = (SELECT ID_Zamowienia FROM inserted)
-	
-	SET @cena_za_osobe = (SELECT KON.Cena
-						  FROM ZamowienieSzczegolowe ZS
-						  JOIN DzienKonferencji DK ON DK.DzienKonferencji=ZS.ID_DniaKonferencji
-						  JOIN Konferencja KON ON KON.ID_Konferencji=DK.ID_Konferencji
-						  WHERE ZS.ID_Zamowienia=@id_zamowienia
-						  )
-						  
-	SET @prog = jaki_prog(@id_zamowienia)	
-	IF(czy_student(@id_zamowienia)) SET @znizka = (SELECT ZS.ProcentZnizki FROM ZnizkaStudencka ZS)
-	ELSE SET @znizka = 100
-	
-	SET @ilosc_osob = (SELECT LiczbaMiejsc FROM inserted)
-	
+
+	SET @id_zam_szczeg = (SELECT INS.ID_ZamSzczegolowego FROM inserted INS)
+	SET @id_zamowienia = (SELECT INS.ID_Zamowienia FROM inserted INS)
 	SET @dotychczasowa_oplata = (SELECT DoZapltay FROM Zamowienie ZAM WHERE ZAM.ID_Zamowienia=@id_zamowienia)
 	
 	UPDATE Zamowienie
-	SET DoZapltay = @dotychczasowa_oplata + (@znizka/100)*(@prog/100)*(@ilosc_osob*@cena_za_osobe)
+	SET DoZapltay = @dotychczasowa_oplata + kwota_za_zam_szczeg(@id_zam_szczeg)
 	WHERE ID_Zamowienia=@id_zamowienia
 				
 END
@@ -373,33 +428,21 @@ ON ZamowienieWarsztatu
 AFTER INSERT
 AS BEGIN
 	DECLARE @id_zamowienia AS INT
-	DECLARE @cena_za_osobe AS MONEY
-	DECLARE @znizka AS SMALLINT
-	DECLARE @ilosc_osob AS INT
 	DECLARE @dotychczasowa_oplata AS MONEY
+	DECLARE @id_zam_warsztatu AS INT
+	
+	SET @id_zam_warsztatu = (SELECT INS.ID_ZamowieniaWarsztatu FROM inserted INS)
 	
 	SET @id_zamowienia = (SELECT ZS.ID_Zamowienia
 						  FROM ZamowienieSzczegolowe ZS
 						  JOIN ZamowienieWarsztatu ZW ON ZS.ID_ZamSzczegolowego=ZW.ID_ZamSzczegolowego
 						  WHERE ZW.ID_ZamowieniaWarsztatu = (SELECT ID_ZamowieniaWarsztatu FROM inserted))
-	
-	SET @cena_za_osobe = (SELECT WAR.Cena
-						  FROM Warsztat WAR
-						  JOIN ZamowienieWarsztatu ZW ON ZW.ID_Warsztatu=WAR.ID_Warsztatu
-						  WHERE ZW.ID_ZamowieniaWarsztatu = (SELECT ID_ZamowieniaWarsztatu FROM inserted)
-						  )
-						  
-	IF(czy_student(@id_zamowienia)) SET @znizka = (SELECT ZS.ProcentZnizki FROM ZnizkaStudencka ZS)
-	ELSE SET @znizka = 100
-	
-	SET @ilosc_osob = (SELECT LiczbaMiejsc FROM inserted)
-	
+
 	SET @dotychczasowa_oplata = (SELECT DoZapltay FROM Zamowienie ZAM WHERE ZAM.ID_Zamowienia=@id_zamowienia)
 	
 	UPDATE Zamowienie
-	SET DoZapltay = @dotychczasowa_oplata + (@znizka/100)*(@ilosc_osob*@cena_za_osobe)
+	SET DoZapltay = @dotychczasowa_oplata + kwota_za_zam_warsztatu(@id_zam_warsztatu)
 	WHERE ID_Zamowienia=@id_zamowienia
 				
 END
 GO
-
