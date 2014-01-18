@@ -10,6 +10,22 @@ GO
 --EXEC dodaj_konferencje 1, '03/13/2014', '03/13/2014', 210, 1
 --EXEC dodaj_konferencje 1, '09/09/2014', '09/09/2014', 210, 1
 
+--INSERT INTO ProgiCenowe (ID_Konferencji,ID_Progu) VALUES (1,1)
+--INSERT INTO ProgiCenowe (ID_Konferencji,ID_Progu) VALUES (1,2)
+--INSERT INTO ProgiCenowe (ID_Konferencji,ID_Progu) VALUES (1,3)
+--INSERT INTO ProgiCenowe (ID_Konferencji,ID_Progu) VALUES (2,1)
+--INSERT INTO ProgiCenowe (ID_Konferencji,ID_Progu) VALUES (2,2)
+--INSERT INTO ProgiCenowe (ID_Konferencji,ID_Progu) VALUES (2,3)
+--INSERT INTO ProgiCenowe (ID_Konferencji,ID_Progu) VALUES (3,1)
+--INSERT INTO ProgiCenowe (ID_Konferencji,ID_Progu) VALUES (3,2)
+--INSERT INTO ProgiCenowe (ID_Konferencji,ID_Progu) VALUES (3,3)
+--INSERT INTO ProgiCenowe (ID_Konferencji,ID_Progu) VALUES (4,1)
+--INSERT INTO ProgiCenowe (ID_Konferencji,ID_Progu) VALUES (4,2)
+--INSERT INTO ProgiCenowe (ID_Konferencji,ID_Progu) VALUES (4,3)
+--INSERT INTO ProgiCenowe (ID_Konferencji,ID_Progu) VALUES (5,1)
+--INSERT INTO ProgiCenowe (ID_Konferencji,ID_Progu) VALUES (5,2)
+--INSERT INTO ProgiCenowe (ID_Konferencji,ID_Progu) VALUES (5,3)
+
 --SELECT * FROM Konferencja WHERE YEAR(DataRozpoczecia) LIKE '2014'
 
 --EXEC dodaj_dzien_konferencji 1, '05/05/2014', 50
@@ -24,10 +40,10 @@ GO
 --EXEC dodaj_warsztat 1, 6, 11, 2, '11:30:00', '14:30:00'
 --EXEC dodaj_warsztat 1, 6, 40, 1, '12:00:00', '15:00:00'
 --EXEC dodaj_warsztat 1, 6, 50, 1, '11:00:00', '12:00:00'
---EXEC dodaj_warsztat 32, 107, 20, 20, '14:30:00', '15:30:00'
---EXEC dodaj_warsztat 45, 108, 10, 20, '16:35:00', '19:35:00'
---EXEC dodaj_warsztat 46, 109, 100, 20, '12:35:00', '15:05:00'
---EXEC dodaj_warsztat 3, 105, 110, 20, '12:00:00', '15:00:00'
+--EXEC dodaj_warsztat 1, 1, 20, 20, '14:30:00', '15:30:00'
+--EXEC dodaj_warsztat 1, 2, 10, 20, '16:35:00', '19:35:00'
+--EXEC dodaj_warsztat 1, 3, 100, 20, '12:35:00', '15:05:00'
+--EXEC dodaj_warsztat 1, 4, 110, 20, '12:00:00', '15:00:00'
 
 --SELECT * FROM Warsztat
 --SELECT * FROM Osoba
@@ -61,6 +77,7 @@ GO
 --SELECT * FROM NiepotwierdzoneDane
 --SELECT * FROM NajpopularniejszeWarsztaty
 --SELECT * FROM NajczestsiKlienci
+--SELECT * FROM KlienciNajwiekszaKwota
 --SELECT * FROM DostepneWarsztaty
 --SELECT * FROM DostepneKonferencje
 
