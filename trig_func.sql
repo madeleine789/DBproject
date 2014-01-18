@@ -77,7 +77,7 @@ AS BEGIN
 					   FROM ZamowienieWarsztatu ZW
 					   WHERE ZW.ID_ZamowieniaWarsztatu=@id_zam_warsztatu)
 	
-	SET @kwota = (@znizka/100)*(@ilosc_osob*@cena_za_osobe)
+	SET @kwota = (@znizka/100.0)*(@ilosc_osob*@cena_za_osobe)
 	RETURN @kwota
 				
 END
@@ -114,7 +114,7 @@ BEGIN
 					   FROM ZamowienieSzczegolowe ZS
 					   WHERE ZS.ID_ZamSzczegolowego=@id_zam_szczeg)
 					   
-	SET @kwota = (@znizka/100)*(@prog/100)*(@ilosc_osob*@cena_za_osobe)
+	SET @kwota = (@znizka/100.0)*(@prog/100.0)*(@ilosc_osob*@cena_za_osobe)
 				
 	RETURN @kwota
 END
