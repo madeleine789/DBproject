@@ -425,18 +425,25 @@ def generuj_plik(filename, l_konf = 50):
             
             f.write('EXEC dodaj_konferencje ' + konf['id_tematu_konf'] + ', ' + konf['data_rozp'] + ', ' + konf['data_zak'] + ', ' + konf['cena'] + ', ' + konf['status'] + '\n')
             
+            for i in xrange(1,4):
+            	f.write('EXEC dodaj_prog_cenowy ' + str(i) + ', ' + str(konf['id_konferencji']) + '\n')
+
             l_dni = konf['lista_dni']
+            
             for day in l_dni:
                 f.write('EXEC dodaj_dzien_konferencji ' + day['id_konferencji'] + ', ' + day['dzien_konferencji'] + ', ' + day['limit_miejsc'] + '\n')
                 l_warsztatow = day['warsztaty']
                 for warszt in l_warsztatow:
                     f.write('EXEC dodaj_warsztat ' + warszt['id_tematu'] + ', ' + warszt['id_dnia'] + ', ' + warszt['cena'] + ', ' + warszt['limit_miejsc'] + ', ' + warszt['godz_rozp'] + ', ' + warszt['godz_zak'] + '\n')
+            
             l_klientow = konf['klienci']
             
             for kl in l_klientow:
                 if 'pracownicy' in kl:
                     f.write('EXEC dodaj_klienta_firma ' + kl['NIP'] + ', ' + kl['nazwa'] + ', ' + kl['telefon'] + ', ' + kl['fax'] + ', ' + kl['email'] + ', ' + kl['adres'] + '\n')
+                    
                     l_pracownikow = kl['pracownicy']
+                    
                     for prac in l_pracownikow:
                         f.write('EXEC dodaj_osobe ' + prac['imie'] + ', ' + prac['nazwisko'] + ', ' + prac['nr_albumu'] + ', ' + prac['telefon'] + ', ' + prac['email'] + '\n')
                         f.write('EXEC dodaj_pracownika ' + prac['NIP'] + ', ' + prac['id_osoby']+ '\n')
@@ -445,6 +452,7 @@ def generuj_plik(filename, l_konf = 50):
                     f.write('EXEC dodaj_klienta_osoba ' + kl['imie'] + ', ' + kl['nazwisko'] + ', ' + kl['nr_albumu'] + ', ' + kl['telefon'] + ', ' + kl['email'] + ', ' + kl['adres'] + '\n')
 
                 zam = kl['zamowienie']
+
                 f.write('EXEC dodaj_zamowienie ' + str(zam['id_klienta']) + ', ' + str(zam['id_konferencji']) + ', ' + "\""+zam['data_zl_zam']+ "\""+ ', ' + zam['status_rejestracji'] + ', ' + str(zam['status_rezerwacji']) + ', ' +str(zam['do_zaplaty']) + ', ' + str(zam['zaplacono']) + ', ' + "\"" + zam['termin_platnosci'] + "\""+ ', ' + str(zam['status_platnosci']) + '\n' )
                 for zam_s in zam['zamowienia_szczegolowe']:
                     f.write('EXEC dodaj_zamowienie_szcz ' + zam_s['id_zamowienia'] + ', ' + zam_s['id_dnia'] + ', ' + zam_s['liczba_miejsc_konf'] + '\n')
@@ -462,7 +470,7 @@ parser = argparse.ArgumentParser(description="")
 
 parser.add_argument("-n", "--number", dest = "number", type=int, default=50,
                     help = "liczba konferencji - default = 50")
-parser.add_argument("-f", "--file", dest="filename", type=str, default="data.sql",
+parser.add_argument("-f", "--file", dest="filename", type=str, default="dataaaaa.sql",
 					help = "nazwa pliku - default = data.sql")
 
 if __name__ == "__main__":
