@@ -184,7 +184,7 @@ CREATE TABLE Prog (
 )
 
 CREATE TABLE ProgiCenowe (
-        ID_Progu INT UNIQUE FOREIGN KEY REFERENCES Prog(ID_Progu) NOT NULL,
+        ID_Progu INT FOREIGN KEY REFERENCES Prog(ID_Progu) NOT NULL,
         ID_Konferencji INT FOREIGN KEY REFERENCES Konferencja(ID_Konferencji) NOT NULL,
         PRIMARY KEY(ID_Progu, ID_Konferencji)
 )
