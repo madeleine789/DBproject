@@ -149,24 +149,6 @@ END
 GO
 
 --
-CREATE TRIGGER Trigger_dodaj_konferencje
-   ON  Konferencja
-   FOR INSERT
-AS
-BEGIN
-  	DECLARE @poczatek DATE
-  	DECLARE @koniec DATE
-  	SET @poczatek = (SELECT DataRozpoczecia FROM inserted)
-  	SET @koniec = (SELECT DataZakonczenia FROM inserted)
-  	IF (@koniec < @poczatek)
-  	BEGIN
-        	RAISERROR('Konferencja nie moze sie zaczynac pozniej niz konczy',16,1)
-        	ROLLBACK TRANSACTION
-  	END
-END
-GO
-
---
 CREATE TRIGGER Trigger_limit_miejsc_konferencja
    ON  ZamowienieSzczegolowe
    INSTEAD OF INSERT
@@ -254,26 +236,6 @@ BEGIN
 			INSERT INTO ZamowienieWarsztatu
 			SELECT INS.ID_ZamSzczegolowego,INS.ID_Warsztatu,INS.LiczbaMiejsc,INS.StatusRezerwacji FROM inserted INS
 		END
-END
-GO
-
---
-CREATE TRIGGER Trigger_dodaj_warsztat
-ON  Warsztat
-FOR INSERT
-AS
-BEGIN
-  	SET NOCOUNT ON;
-  	DECLARE @poczatek TIME
-  	DECLARE @koniec TIME
-  	SET @poczatek = (SELECT GodzinaRozpoczecia FROM inserted)
-  	SET @koniec = (SELECT GodzinaZakonczenia FROM inserted)
-  	
-  	IF (@koniec <= @poczatek)
-  	BEGIN
-        	RAISERROR('Warsztat nie moze konczyc sie wczesniej niz sie zaczyna.',16,1)
-        	ROLLBACK TRANSACTION
-  	END
 END
 GO
 
