@@ -373,7 +373,6 @@ END
 GO
 
 -- 
-
 CREATE TRIGGER Trigger_usun_zamszczeg
 ON ZamowienieSzczegolowe
 INSTEAD OF DELETE
@@ -396,6 +395,7 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+		---- Aktualizacja kwoty DoZaplaty
 		DECLARE @id_zamowienia INT
 		DECLARE @dotychczasowa_oplata AS MONEY
 		DECLARE @kwota_warsztaty AS MONEY
@@ -412,6 +412,7 @@ BEGIN
 		SET DoZapltay = @dotychczasowa_oplata - @kwota_warsztaty - @kwota_zam_szczeg
 		WHERE ID_Zamowienia = @id_zamowienia
 		
+		---- Usuwanie odpowiednich rekordow
 		DELETE FROM UczestnikWarsztatu 
 		WHERE ID_ZamowieniaWarsztatu IN (SELECT ZW.ID_ZamowieniaWarsztatu
 										 FROM ZamowienieWarsztatu ZW
@@ -447,6 +448,7 @@ BEGIN
 	END
 	ELSE
 	BEGIN
+		---- Aktualizacja kwoty DoZaplaty
 		DECLARE @id_zamowienia INT
 		DECLARE @dotychczasowa_oplata AS MONEY
 		DECLARE @kwota AS MONEY
@@ -464,11 +466,13 @@ BEGIN
 		SET DoZapltay = @dotychczasowa_oplata - @kwota
 		WHERE ID_Zamowienia = @id_zamowienia
 		
-		IF ((SELECT COUNT(*) FROM deleted) = 1)BEGIN
+		---- Usuwanie odpowiednich rekordow
+		IF ((SELECT COUNT(*) FROM deleted) = 1)
+		BEGIN
 			DELETE FROM UczestnikWarsztatu WHERE ID_ZamowieniaWarsztatu = (SELECT ID_ZamowieniaWarsztatu FROM deleted)
 			DELETE FROM ZamowienieWarsztatu WHERE ID_ZamowieniaWarsztatu = (SELECT ID_ZamowieniaWarsztatu FROM deleted)
-		END
-		ELSE BEGIN
+		END ELSE 
+		BEGIN
 			DELETE FROM UczestnikWarsztatu WHERE ID_ZamowieniaWarsztatu IN (SELECT ZW.ID_ZamowieniaWarsztatu
 																			FROM ZamowienieWarsztatu ZW
 																			JOIN ZamowienieSzczegolowe ZS ON ZS.ID_ZamSzczegolowego=ZW.ID_ZamSzczegolowego
@@ -482,3 +486,114 @@ BEGIN
 END
 GO
 
+--
+CREATE TRIGGER Trigger_wplata
+ON Zamowienie
+AFTER UPDATE
+AS
+BEGIN
+	DECLARE @do_zaplaty MONEY
+	DECLARE @zaplacono MONEY
+	DECLARE @id_zamowienia INT
+	
+	SET @id_zamowienia = (SELECT ID_Zamowienia FROM inserted)
+	
+	SET @do_zaplaty = (SELECT ZAM.DoZapltay
+					   FROM Zamowienie ZAM
+					   WHERE ZAM.ID_Zamowienia = @id_zamowienia)
+
+	SET @zaplacono = (SELECT ZAM.Zaplacono
+					  FROM Zamowienie ZAM
+					  WHERE ZAM.ID_Zamowienia = @id_zamowienia)	
+	IF (@zaplacono = @do_zaplaty) 
+	BEGIN
+		UPDATE Zamowienie
+		SET StatusPlatnosci = 2
+		WHERE ID_Zamowienia = @id_zamowienia
+	END
+END
+GO
+
+--
+CREATE TRIGGER Trigger_zmiana_statusu
+ON Konferencja
+AFTER UPDATE
+AS
+BEGIN
+	DECLARE @status SMALLINT
+	DECLARE @id_konferencji INT
+	SET @id_konferencji = (SELECT ID_Konferencji FROM inserted)
+	SET @status = (SELECT StatusKonferencji FROM Konferencja WHERE ID_Konferencji = @id_konferencji)
+	
+	IF(@status = 2) 
+	BEGIN
+		UPDATE Zamowienie 
+		SET StatusPlatnosci = 3
+		WHERE ID_Zamowienia IN (SELECT ZAM.ID_Zamowienia
+								FROM Konferencja KON
+								JOIN Zamowienie ZAM ON KON.ID_Konferencji=ZAM.ID_Konferencji)
+		UPDATE Zamowienie
+		SET StatusRejestracji = 3
+		WHERE ID_Zamowienia IN (SELECT ZAM.ID_Zamowienia
+								FROM Konferencja KON
+								JOIN Zamowienie ZAM ON KON.ID_Konferencji=ZAM.ID_Konferencji)
+	END
+END
+GO
+
+--
+CREATE TRIGGER Trigger_dodaj_uczestnika_kon
+ON UczestnikKonferencji
+AFTER INSERT
+AS 
+BEGIN
+	DECLARE @limit AS SMALLINT
+	DECLARE @wprowadzone_miejsca AS SMALLINT
+	DECLARE @id_zam_szcz AS INT
+	
+	SET @id_zam_szcz = (SELECT ID_ZamSzczegolowego FROM inserted)
+	
+	SET @limit = (SELECT ZS.LiczbaMiejsc
+				  FROM ZamowienieSzczegolowe ZS
+				  WHERE ZS.ID_ZamSzczegolowego=@id_zam_szcz)
+				  
+	SET @wprowadzone_miejsca = (SELECT COUNT(*)
+								FROM UczestnikKonferencji UK
+								WHERE UK.ID_ZamSzczegolowego=@id_zam_szcz)
+								
+	IF(@wprowadzone_miejsca > @limit)
+	BEGIN
+		RAISERROR('Przekroczono liczbe osob zadeklarowana w rejestracji.',16,1)
+        ROLLBACK TRANSACTION
+	END
+	
+END
+GO
+
+--
+CREATE TRIGGER Trigger_dodaj_uczestnika_war
+ON UczestnikWarsztatu
+AFTER INSERT
+AS 
+BEGIN
+	DECLARE @limit AS SMALLINT
+	DECLARE @wprowadzone_miejsca AS SMALLINT
+	DECLARE @id_zam_war AS INT
+	
+	SET @id_zam_war = (SELECT ID_ZamowieniaWarsztatu FROM inserted)
+	
+	SET @limit = (SELECT ZW.LiczbaMiejsc
+				  FROM ZamowienieWarsztatu ZW
+				  WHERE ZW.ID_ZamowieniaWarsztatu=@id_zam_war)
+				  
+	SET @wprowadzone_miejsca = (SELECT COUNT(*)
+								FROM UczestnikWarsztatu UW
+								WHERE UW.ID_ZamowieniaWarsztatu = @id_zam_war)
+								
+	IF(@wprowadzone_miejsca > @limit)
+	BEGIN
+		RAISERROR('Przekroczono liczbe osob zadeklarowana w rejestracji.',16,1)
+        ROLLBACK TRANSACTION
+	END
+	
+END
