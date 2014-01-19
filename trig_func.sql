@@ -434,7 +434,7 @@ BEGIN
 	DECLARE @data_konferencji DATE
 	DECLARE @id_zam_szczegolowego INT
 	
-	SET @id_zam_szczegolowego = (SELECT ID_ZamSzczegolowego FROM deleted)
+	SET @id_zam_szczegolowego = (SELECT DISTINCT ID_ZamSzczegolowego FROM deleted)
 	SET @dzisiejsza_data = GETDATE()
 	SET @data_konferencji = (SELECT DK.DzienKonferencji
 							 FROM ZamowienieSzczegolowe ZS
@@ -451,20 +451,33 @@ BEGIN
 		DECLARE @dotychczasowa_oplata AS MONEY
 		DECLARE @kwota AS MONEY
 		DECLARE @id_zam_warsztatu AS MONEY
-		SET @id_zam_warsztatu = (SELECT ID_ZamowieniaWarsztatu FROM deleted)
 		SET @id_zamowienia = (SELECT ZAM.ID_Zamowienia
 							  FROM Zamowienie ZAM
 							  JOIN ZamowienieSzczegolowe ZS ON ZS.ID_Zamowienia=ZAM.ID_Zamowienia
 							  WHERE ZS.ID_ZamSzczegolowego=@id_zam_szczegolowego)
 		SET @dotychczasowa_oplata = (SELECT DoZapltay FROM Zamowienie ZAM WHERE ZAM.ID_Zamowienia=@id_zamowienia)
-		SET @kwota = dbo.kwota_za_zam_warsztatu(@id_zam_warsztatu)
+		SET @kwota = ISNULL((SELECT SUM(dbo.kwota_za_zam_warsztatu(@id_zam_warsztatu))
+						     FROM ZamowienieWarsztatu ZW
+						     WHERE ZW.ID_ZamowieniaWarsztatu IN (SELECT ID_ZamowieniaWarsztatu FROM deleted)),0)
 		
 		UPDATE Zamowienie
 		SET DoZapltay = @dotychczasowa_oplata - @kwota
 		WHERE ID_Zamowienia = @id_zamowienia
 		
-		DELETE FROM UczestnikWarsztatu WHERE ID_ZamowieniaWarsztatu = @id_zam_warsztatu
-		DELETE FROM ZamowienieWarsztatu WHERE ID_ZamowieniaWarsztatu = @id_zam_warsztatu
+		IF ((SELECT COUNT(*) FROM deleted) = 1)BEGIN
+			DELETE FROM UczestnikWarsztatu WHERE ID_ZamowieniaWarsztatu = (SELECT ID_ZamowieniaWarsztatu FROM deleted)
+			DELETE FROM ZamowienieWarsztatu WHERE ID_ZamowieniaWarsztatu = (SELECT ID_ZamowieniaWarsztatu FROM deleted)
+		END
+		ELSE BEGIN
+			DELETE FROM UczestnikWarsztatu WHERE ID_ZamowieniaWarsztatu IN (SELECT ZW.ID_ZamowieniaWarsztatu
+																			FROM ZamowienieWarsztatu ZW
+																			JOIN ZamowienieSzczegolowe ZS ON ZS.ID_ZamSzczegolowego=ZW.ID_ZamSzczegolowego
+																			WHERE ZS.ID_ZamSzczegolowego=@id_zam_szczegolowego)
+			DELETE FROM ZamowienieWarsztatu WHERE ID_ZamowieniaWarsztatu IN (SELECT ZW.ID_ZamowieniaWarsztatu
+																			FROM ZamowienieWarsztatu ZW
+																			JOIN ZamowienieSzczegolowe ZS ON ZS.ID_ZamSzczegolowego=ZW.ID_ZamSzczegolowego
+																			WHERE ZS.ID_ZamSzczegolowego=@id_zam_szczegolowego)
+		END
 	END
 END
 GO
