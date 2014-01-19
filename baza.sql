@@ -620,3 +620,93 @@ BEGIN
 		VALUES(@ID_UczestnikaKonferencji,@ID_ZamowieniaWarsztatu);
 END
 GO
+use Konferencje
+
+GO
+CREATE PROCEDURE usun_zmaowienie_szczegolowe
+	
+	@IDZamowienia INT,
+	@IDDniaKonferencji INT
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+		IF EXISTS (select * from ZamowienieSzczegolowe WHERE
+			ZamowienieSzczegolowe.ID_Zamowienia= @IDZamowienia AND
+			ZamowienieSzczegolowe.ID_DniaKonferencji = @IDDniaKonferencji ) 
+			DELETE FROM ZamowienieSzczegolowe WHERE
+			ZamowienieSzczegolowe.ID_Zamowienia= @IDZamowienia AND
+			ZamowienieSzczegolowe.ID_DniaKonferencji = @IDDniaKonferencji
+		ELSE 
+		RAISERROR('Nie mozna usunac zamowienia.', 16, 1);
+END
+GO
+GO
+CREATE PROCEDURE usun_zmaowienie_warsztatu
+	
+	@IDZamowieniaSzcz INT,
+	@IDWarsztatu INT
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+		IF EXISTS (select * from ZamowienieWarsztatu WHERE
+			ZamowienieWarsztatu.ID_ZamSzczegolowego= @IDZamowieniaSzcz AND
+			ZamowienieWarsztatu.ID_Warsztatu = @IDWarsztatu ) 
+			DELETE FROM ZamowienieSzczegolowe WHERE
+			ZamowienieWarsztatu.ID_ZamSzczegolowego= @IDZamowieniaSzcz AND
+			ZamowienieWarsztatu.ID_Warsztatu = @IDWarsztatu
+		ELSE 
+		RAISERROR('Nie mozna usunac zamowienia.', 16, 1);
+END
+GO
+GO
+GO
+CREATE PROCEDURE dodaj_osobee
+	@Imie NVARCHAR(20),
+	@Nazwisko NVARCHAR(20),
+	@NrAlbumu NVARCHAR(6) = null,
+	@Telefon NVARCHAR(25) = null,
+	@Email NVARCHAR(45) = null
+AS
+	BEGIN
+	SET NOCOUNT ON
+	IF  NOT EXISTS (SELECT * FROM Osoba AS O WHERE
+		O.Imie LIKE @Imie AND O.Nazwisko LIKE @Nazwisko AND 
+		O.NrAlbumu LIKE @NrAlbumu AND O.Telefon LIKE @Telefon AND 
+		O.Email LIKE @Email)
+
+		INSERT INTO Osoba
+		VALUES(NULL,NULL, @Imie, @Nazwisko, @NrAlbumu, @Telefon, @Email)
+	ELSE
+		RAISERROR('Nie mozna dodac osoby.',16, 1);
+
+
+END
+		
+
+GO
+CREATE PROCEDURE aktualizuj_status_konferencji
+	@IDKonferencji INT,
+	@IDStatusu INT
+	
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+		IF (SELECT Konferencja.ID_Konferencji FROM Konferencja WHERE Konferencja.ID_Konferencji = @IDKonferencji) is not null
+		BEGIN
+			UPDATE Konferencja
+			SET StatusKonferencji = @IDStatusu
+			WHERE Konferencja.ID_Konferencji = @IDKonferencji
+		END
+		ELSE
+		BEGIN
+			RAISERROR('Konferencja nie istnieje. ', 16, 1);
+		END
+		
+END
+GO
