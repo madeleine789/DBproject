@@ -54,11 +54,12 @@ GO
 --EXEC dodaj_zamowienie_szcz 1,6,1
 
 ----SELECT * FROM ZamowienieSzczegolowe
---SELECT * FROM Zamowienie
+----SELECT * FROM Zamowienie
 --EXEC dodaj_zamowienie_warsztatu 1,3,1,0
 --EXEC dodaj_zamowienie_warsztatu 1,2,1,0
 --EXEC dodaj_zamowienie_warsztatu 1,1,1,0
 --SELECT * FROM  ZamowienieWarsztatu
+
 --DELETE FROM ZamowienieWarsztatu
 --WHERE ID_ZamowieniaWarsztatu=1
 
