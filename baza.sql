@@ -132,7 +132,7 @@ CREATE TABLE Warsztat (
 	LimitMiejscWarsztat SMALLINT NOT NULL CHECK(LimitMiejscWarsztat > 0),
 	GodzinaRozpoczecia TIME NOT NULL,
 	GodzinaZakonczenia TIME NOT NULL,
-	CONSTRAINT chech_time CHECK (GodzinaRozpoczecia < GodzinaZakonczenia)
+	CONSTRAINT check_time CHECK (GodzinaRozpoczecia < GodzinaZakonczenia)
 )
 
 CREATE TABLE Zamowienie (
