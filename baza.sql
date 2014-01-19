@@ -109,6 +109,7 @@ CREATE TABLE Konferencja (
 	DataZakonczenia DATE NOT NULL,
 	Cena MONEY NOT NULL CHECK(Cena > 0),
 	StatusKonferencji SMALLINT FOREIGN KEY REFERENCES StatusKonferencji(ID_StatusuKonferencji) NOT NULL,
+	CONSTRAINT check_date CHECK (DataRozpoczecia < DataZakonczenia)
 )
 
 CREATE TABLE DzienKonferencji (
@@ -130,8 +131,8 @@ CREATE TABLE Warsztat (
 	Cena MONEY NOT NULL CHECK(Cena > 0),
 	LimitMiejscWarsztat SMALLINT NOT NULL CHECK(LimitMiejscWarsztat > 0),
 	GodzinaRozpoczecia TIME NOT NULL,
-	GodzinaZakonczenia TIME NOT NULL
-	
+	GodzinaZakonczenia TIME NOT NULL,
+	CONSTRAINT chech_time CHECK (GodzinaRozpoczecia < GodzinaZakonczenia)
 )
 
 CREATE TABLE Zamowienie (
