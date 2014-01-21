@@ -197,7 +197,25 @@ GO
 INSERT INTO Prog (ID_Progu, ProcentCeny, GornyProgCzasowy, DolnyProgCzasowy) VALUES (3, 110, 1, 0)
 GO
 
+----------------------------------------------------------------------------------------
+CREATE INDEX IndexImieNazwisko
+ON Osoba (Nazwisko, Imie)
+
+CREATE INDEX IndexCenaKonferencja
+ON Konferencja (Cena)
+
+CREATE INDEX IndexCenaWarsztat
+ON Warsztat (Cena)
+
+CREATE INDEX IndexLiczbaZamSzczeg
+ON ZamowienieSzczegolowe (LiczbaMiejsc)
+
+CREATE INDEX IndexLiczbaZamWarsztatu
+ON ZamowienieWarsztatu (LiczbaMiejsc)
+
+GO
 ----------------------------------------------------------------------------------------------------------------
+
 CREATE PROCEDURE nowy_prog
 	@ProcentCeny SMALLINT,
 	@GornyProgCzasowy SMALLINT,
