@@ -728,3 +728,34 @@ BEGIN
 		
 END
 GO
+
+CREATE PROCEDURE dodaj_prog_k
+
+	@ID_Progu INT,
+	@ID_Konferencji INT
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+		INSERT INTO ProgiCenowe(ID_Progu,ID_Konferencji)
+		VALUES(@ID_Progu,@ID_Konferencji);
+
+END
+GO
+
+CREATE PROCEDURE dodaj_prog
+
+	@ProcentCeny SMALLINT,
+	@Gorny SMALLINT,
+	@Dolny SMALLINT
+	
+AS
+BEGIN
+
+	SET NOCOUNT ON;
+		INSERT INTO Prog(ProcentCeny,GornyProgCzasowy,DolnyProgCzasowy)
+		VALUES(@ProcentCeny,@Gorny, @Dolny);
+
+END
+GO
