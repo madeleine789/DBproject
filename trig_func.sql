@@ -335,7 +335,7 @@ END
 GO
 
 -- 
-CREATE TRIGGER Trigger_usun_zamszczeg
+CREATE TRIGGER Trigger_usun_zam_szczeg
 ON ZamowienieSzczegolowe
 INSTEAD OF DELETE
 AS
@@ -388,7 +388,7 @@ END
 GO
 
 --
-CREATE TRIGGER Trigger_czymozna_usunac_warsztat
+CREATE TRIGGER Trigger_usun_zam_warsztatu
 ON ZamowienieWarsztatu
 INSTEAD OF DELETE
 AS
