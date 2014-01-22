@@ -641,7 +641,7 @@ GO
 use Konferencje
 
 GO
-CREATE PROCEDURE usun_zmaowienie_szczegolowe
+CREATE PROCEDURE usun_zamowienie_szczegolowe
 	
 	@IDZamowienia INT,
 	@IDDniaKonferencji INT
@@ -661,7 +661,7 @@ BEGIN
 END
 GO
 GO
-CREATE PROCEDURE usun_zmaowienie_warsztatu
+CREATE PROCEDURE usun_zamowienie_warsztatu
 	
 	@IDZamowieniaSzcz INT,
 	@IDWarsztatu INT
@@ -673,7 +673,7 @@ BEGIN
 		IF EXISTS (select * from ZamowienieWarsztatu WHERE
 			ZamowienieWarsztatu.ID_ZamSzczegolowego= @IDZamowieniaSzcz AND
 			ZamowienieWarsztatu.ID_Warsztatu = @IDWarsztatu ) 
-			DELETE FROM ZamowienieSzczegolowe WHERE
+			DELETE FROM ZamowienieWarsztatu WHERE
 			ZamowienieWarsztatu.ID_ZamSzczegolowego= @IDZamowieniaSzcz AND
 			ZamowienieWarsztatu.ID_Warsztatu = @IDWarsztatu
 		ELSE 
