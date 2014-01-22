@@ -109,7 +109,7 @@ CREATE TABLE Konferencja (
 	DataZakonczenia DATE NOT NULL,
 	Cena MONEY NOT NULL CHECK(Cena > 0),
 	StatusKonferencji SMALLINT FOREIGN KEY REFERENCES StatusKonferencji(ID_StatusuKonferencji) NOT NULL,
-	CONSTRAINT check_date CHECK (DataRozpoczecia < DataZakonczenia)
+	CONSTRAINT check_date CHECK (DataRozpoczecia <= DataZakonczenia)
 )
 
 CREATE TABLE DzienKonferencji (
@@ -128,7 +128,7 @@ CREATE TABLE Warsztat (
 	ID_Warsztatu INT IDENTITY(1,1) PRIMARY KEY  NOT NULL,
 	ID_TematuWarsztatu INT FOREIGN KEY REFERENCES TematWarsztatu(ID_TematuWarsztatu) NOT NULL,
 	ID_DniaKonferencji INT FOREIGN KEY REFERENCES DzienKonferencji(ID_DniaKonferencji) NOT NULL,
-	Cena MONEY NOT NULL CHECK(Cena > 0),
+	Cena MONEY NOT NULL CHECK(Cena >= 0),
 	LimitMiejscWarsztat SMALLINT NOT NULL CHECK(LimitMiejscWarsztat > 0),
 	GodzinaRozpoczecia TIME NOT NULL,
 	GodzinaZakonczenia TIME NOT NULL,
@@ -729,7 +729,7 @@ BEGIN
 END
 GO
 
-CREATE PROCEDURE dodaj_prog_k
+CREATE PROCEDURE dodaj_prog_cenowy
 
 	@ID_Progu INT,
 	@ID_Konferencji INT
