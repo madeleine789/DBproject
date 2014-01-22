@@ -58,7 +58,7 @@ GO
 
 --SELECT * FROM ZamowienieSzczegolowe
 --SELECT * FROM Zamowienie WHERE YEAR(DataZlozeniaZamowienia) LIKE '2014'
---SELECT * FROM  ZamowienieWarsztatu
+--SELECT * FROM  ZamowienieWarsztatu WHERE ID_ZamowieniaWarsztatu= 26713
 
 --DELETE FROM ZamowienieWarsztatu
 --WHERE ID_ZamowieniaWarsztatu=1
@@ -115,10 +115,10 @@ GO
 --EXEC dodaj_warsztat 16, 91, 100, 50, '12:35:00', '15:05:00'
 --EXEC dodaj_warsztat 12, 92, 110, 20, '12:00:00', '15:00:00'
 
---EXEC dodaj_zamowienie 170, 54, "01/10/2014", 1, 0, 0, 0, "01/24/2014", 2
+--EXEC dodaj_zamowienie 170, 54, "01/10/2014", 1, 0, 480, 480, "01/24/2014", 2
 --EXEC dodaj_zamowienie_szcz 3169,94,5
 
---EXEC dodaj_zamowienie 321, 54, "01/11/2014", 1, 0, 0, 0, "01/25/2014", 2
+--EXEC dodaj_zamowienie 321, 54, "01/11/2014", 1, 0, 320, 320, "01/25/2014", 2
 --EXEC dodaj_zamowienie_szcz 3170,94,7
 
 --EXEC dodaj_zamowienie 162, 54, "01/10/2014", 1, 0, 0, 0, "01/24/2014", 2
@@ -130,18 +130,62 @@ GO
 --EXEC dodaj_zamowienie 200, 54, "01/10/2014", 1, 1, 500, 520, "01/24/2014", 1
 --EXEC dodaj_zamowienie_szcz 3173,94,2
 
+--EXEC dodaj_uczestnika_konferencji 34,6679
+--EXEC dodaj_uczestnika_konferencji 2,6679
+--EXEC dodaj_uczestnika_konferencji 45,6679
+--EXEC dodaj_uczestnika_konferencji 76,6679
+--EXEC dodaj_uczestnika_konferencji 34,6679
+--EXEC dodaj_uczestnika_konferencji 24,6680
+--EXEC dodaj_uczestnika_konferencji 11,6680
+--EXEC dodaj_uczestnika_konferencji 42,6680
+--EXEC dodaj_uczestnika_konferencji 75,6680
+--EXEC dodaj_uczestnika_konferencji 89,6680
+--EXEC dodaj_uczestnika_konferencji 234,6680
+--EXEC dodaj_uczestnika_konferencji 245,6680
+--EXEC dodaj_uczestnika_konferencji 543,6681
+--EXEC dodaj_uczestnika_konferencji 64,6681
+--EXEC dodaj_uczestnika_konferencji 174,6682
+--EXEC dodaj_uczestnika_konferencji 131,6682
+--EXEC dodaj_uczestnika_konferencji 142,6682
+--EXEC dodaj_uczestnika_konferencji 145,6682
+--EXEC dodaj_uczestnika_konferencji 162,6682
+--EXEC dodaj_uczestnika_konferencji 173,6682
+--EXEC dodaj_uczestnika_konferencji 186,6682
+--EXEC dodaj_uczestnika_konferencji 132,6683
+--EXEC dodaj_uczestnika_konferencji 162,6683
 
+--EXEC dodaj_zamowienie_warsztatu 6680,30,20,1
 
+--EXEC dodaj_uczestnika_warsztatu 8730,26713
+--EXEC dodaj_uczestnika_warsztatu 2,26713
+--EXEC dodaj_uczestnika_warsztatu 3,26713
+--EXEC dodaj_uczestnika_warsztatu 4,26713
+--EXEC dodaj_uczestnika_warsztatu 1,26713
+--EXEC dodaj_uczestnika_warsztatu 1,26713
+--EXEC dodaj_uczestnika_warsztatu 1,26713
+--EXEC dodaj_uczestnika_warsztatu 8737,26713
+--EXEC dodaj_uczestnika_warsztatu 8738,26713
+--EXEC dodaj_uczestnika_warsztatu 8739,26713
+--EXEC dodaj_uczestnika_warsztatu 8740,26713
+--EXEC dodaj_uczestnika_warsztatu 8741,26713
+--EXEC dodaj_uczestnika_warsztatu 8742,26713
+--EXEC dodaj_uczestnika_warsztatu 8743,26713
+--EXEC dodaj_uczestnika_warsztatu 8744,26713
+--EXEC dodaj_uczestnika_warsztatu 8745,26713
+--EXEC dodaj_uczestnika_warsztatu 8746,26713
+--EXEC dodaj_uczestnika_warsztatu 8747,26713
+--EXEC dodaj_uczestnika_warsztatu 8748,26713
+--EXEC dodaj_uczestnika_warsztatu 8749,26713
 
-----SELECT * FROM Przychod
-----SELECT * FROM NieprawidlowaKwota
-----SELECT * FROM NiepotwierdzoneDaneee
-----SELECT * FROM NajpopularniejszeWarsztaty
-----SELECT * FROM NajczestsiKlienci
-----SELECT * FROM KlienciNajwiekszaKwota
-----SELECT * FROM DostepneWarsztaty
-----SELECT * FROM DostepneKonferencje
-----EXEC lista_osob_warsztat 1
-----EXEC lista_osob_konferencja 2
+--SELECT * FROM Przychod
+--SELECT * FROM NieprawidlowaKwota
+--SELECT * FROM NiepotwierdzoneDane
+--SELECT * FROM NajpopularniejszeWarsztaty
+--SELECT * FROM NajczestsiKlienci
+--SELECT * FROM KlienciNajwiekszaKwota
+--SELECT * FROM DostepneWarsztaty
+--SELECT * FROM DostepneKonferencje
+--EXEC lista_osob_warsztat 30
+--EXEC lista_osob_konferencja 94
 
 		 
