@@ -63,10 +63,10 @@ SELECT KON.Cena PodstawowaCenaZaOsobe,
        (SELECT PR.ProcentCeny 
         FROM Prog PR
         WHERE 
-        (DATEDIFF(MONTH,GETDATE(), KON.DataRozpoczecia) > PR.DolnyProgCzasowy AND 
-        DATEDIFF(MONTH,GETDATE(), KON.DataRozpoczecia) <= PR.GornyProgCzasowy) OR 
+        (DATEDIFF(MONTH,GETDATE(), KON.DataRozpoczecia) >= PR.DolnyProgCzasowy AND 
+        DATEDIFF(MONTH,GETDATE(), KON.DataRozpoczecia) < PR.GornyProgCzasowy) OR 
         (PR.GornyProgCzasowy IS NULL AND 
-        DATEDIFF(MONTH,GETDATE(), KON.DataRozpoczecia) > PR.DolnyProgCzasowy)) ObowiazujacyProgCenowy,
+        DATEDIFF(MONTH,GETDATE(), KON.DataRozpoczecia) >= PR.DolnyProgCzasowy)) ObowiazujacyProgCenowy,
        KON.DataRozpoczecia DataRozpoczecia,
        KON.DataZakonczenia DataZakonczenia,
        TK.Opis OpisKonferencji
@@ -80,7 +80,7 @@ GO
 CREATE VIEW DostepneWarsztaty AS
 SELECT WAR.Cena PodstawowaCenaZaOsobe,
 	   TW.Opis TematWarsztatu,
-	   TK.Opis ,
+	   TK.Opis TematKonferencji,
 	   DK.DzienKonferencji DataWarsztatu,
 	   WAR.LimitMiejscWarsztat - ISNULL(
 		((SELECT SUM(ZW.LiczbaMiejsc)
@@ -97,8 +97,7 @@ AND  WAR.LimitMiejscWarsztat - ISNULL(
 		((SELECT SUM(ZW.LiczbaMiejsc)
 		 FROM ZamowienieWarsztatu ZW
 		 WHERE WAR.ID_Warsztatu=ZW.ID_Warsztatu
-		 GROUP BY ZW.ID_Warsztatu)),0) > 0
-GO							 
+		 GROUP BY ZW.ID_Warsztatu)),0) > 0				 
 GO							 
 
 ------------ Firmy ktore nie maja potwierdzonych danych uczestnikow dla zamowien przy uplywajacym czasie ----
@@ -109,11 +108,11 @@ SELECT FI.NazwaFirmy,
 FROM Zamowienie ZAM
 JOIN Klient KLI ON KLI.ID_Klienta=ZAM.ID_Klienta
 JOIN ZamowienieSzczegolowe ZS ON ZS.ID_Zamowienia=ZAM.ID_Zamowienia
-JOIN ZamowienieWarsztatu ZW ON ZW.ID_ZamSzczegolowego=ZS.ID_ZamSzczegolowego
+LEFT OUTER JOIN ZamowienieWarsztatu ZW ON ZW.ID_ZamSzczegolowego=ZS.ID_ZamSzczegolowego
 JOIN Firma FI ON FI.ID_Klienta=KLI.ID_Klienta AND KLI.CzyFirma = 1
-WHERE (ZAM.StatusRezerwacji = 1 OR ZW.StatusRezerwacji = 1) AND 
-      (DATEDIFF(DAY,ZAM.DataZlozeniaZamowienia,GETDATE()) >= 7 AND 
-       DATEDIFF(DAY,ZAM.DataZlozeniaZamowienia,GETDATE()) <= 14)
+JOIN DzienKonferencji DK ON DK.ID_DniaKonferencji=ZS.ID_DniaKonferencji
+WHERE (ZAM.StatusRezerwacji = 0 ) AND 
+      (DATEDIFF(DAY,GETDATE(),DK.DzienKonferencji) <= 14)
 GO
 
 ---------- Klienci ktorzy wplacili nieprawidlowa kwote -------
@@ -122,16 +121,20 @@ SELECT ID,
        Klient, 
        Firma, 
        Email, 
+       Telefon,
        Zaplacono, 
        DoZaplaty
 FROM
 (
 SELECT KLI.ID_Klienta ID, 
        OS.Imie+' '+OS.Nazwisko Klient, 
-       KLI.CzyFirma Firma, OS.Email Email, 
+       KLI.CzyFirma Firma, 
+       OS.Email, 
+       OS.Telefon,
        ZAM.Zaplacono Zaplacono, 
        ZAM.DoZapltay DoZaplaty, 
-       ZAM.TerminPlatnosci TerminPlatnosci
+       ZAM.TerminPlatnosci TerminPlatnosci,
+       ZAM.StatusPlatnosci
 FROM Klient KLI
 JOIN Zamowienie ZAM ON	 KLI.ID_Klienta = ZAM.ID_Klienta
 JOIN Osoba OS ON OS.ID_Klienta = KLI.ID_Klienta
@@ -139,15 +142,17 @@ UNION
 SELECT KLI.ID_Klienta ID, 
        FI.NazwaFirmy Klient, 
        KLI.CzyFirma Firma, 
-       FI.Email Email, 
+       FI.Email, 
+       Fi.Telefon,
        ZAM.Zaplacono Zaplacono, 
        ZAM.DoZapltay DoZapltay, 
-       ZAM.TerminPlatnosci TerminPlatnosci
+       ZAM.TerminPlatnosci TerminPlatnosci,
+       ZAM.StatusPlatnosci
 FROM Klient KLI
 JOIN Zamowienie ZAM ON KLI.ID_Klienta = ZAM.ID_Klienta
 JOIN Firma FI ON FI.ID_Klienta = KLI.ID_Klienta
 ) UnionTable
-WHERE DoZaplaty != Zaplacono AND DATEDIFF(DAY, TerminPlatnosci,GETDATE()) >= 7
+WHERE StatusPlatnosci=1 
 GO
 
 -------- Przychody firmy podzielone na lata i miesiace ------
@@ -176,13 +181,12 @@ GO
 --------- Najpopularniejsze tematy warsztatow ----------
 CREATE VIEW NajpopularniejszeWarsztaty AS
 SELECT TOP 10 
-       WAR.ID_Warsztatu ID, 
        CAST(TW.Opis AS VARCHAR(200)) TematWarsztatu, 
        SUM(ZW.LiczbaMiejsc) SumaZarezerwowanychMiejsc
 FROM Warsztat WAR
 JOIN TematWarsztatu TW ON WAR.ID_TematuWarsztatu=TW.ID_TematuWarsztatu
 JOIN ZamowienieWarsztatu ZW ON ZW.ID_Warsztatu=WAR.ID_Warsztatu
-GROUP BY WAR.ID_Warsztatu, CAST(TW.Opis AS VARCHAR(200))
+GROUP BY TW.ID_TematuWarsztatu, CAST(TW.Opis AS VARCHAR(200))
 ORDER BY SUM(ZW.LiczbaMiejsc) DESC
 GO
 
