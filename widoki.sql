@@ -212,7 +212,6 @@ JOIN Klient KLI ON KLI.ID_Klienta=ZAM.ID_Klienta
 JOIN Firma FI ON FI.ID_Klienta=KLI.ID_Klienta
 JOIN Konferencja KON ON KON.ID_Konferencji=ZAM.ID_Konferencji
 WHERE ZAM.StatusRejestracji = 1 
-ORDER BY TerminPlatnosci DESC
 GO
 
 ---------- Lista osobowa dla danej konferencji ---------
